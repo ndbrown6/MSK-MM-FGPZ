@@ -7,13 +7,13 @@ Likelihood of ???
 Returns the likelihood of ???
 }
 \usage{
-LL(m_j, c_j, n, v_b)
+LL(m_j, c_j, n, b)
 }
 \arguments{
 \item{m_j}{???}
 \item{c_j}{???}
 \item{n}{???}
-\item{v_b}{???}
+\item{b}{???}
 }
 \note{
 }
