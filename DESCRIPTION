@@ -1,0 +1,13 @@
+Type: Package
+Package: <some name here>
+Version: 0.0-1
+Date: 2021-04-29
+Title: <some title here>
+Author: David Brown <brownd7@mskcc.org>
+Description: <some description here>
+Maintainer: David Brown <brownd7@mskcc.org>
+URL: https://github.com/ndbrown6/MSK-MM-FGPZ
+Depends: R (>= 3.6.1)
+License: GPL (>= 2)
+biocViews:
+LazyLoad: yes

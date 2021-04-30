@@ -1,0 +1,2 @@
+exportPattern("^[^\\.]")
+export(.<some env name here>)
