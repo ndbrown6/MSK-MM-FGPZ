@@ -123,13 +123,13 @@ ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
 	mz[(mz/c) > 1] = c[(mz/c) > 1]
-	a = seq(from = 1, to = 3, length = 100)
+	a = seq(from = 0, to = 4, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = Total_LL(mz, c, n, 2, a = a[i])
+		ll[[j]][i] = Total_LL(mz, c, n, 1, a = a[i])
 	}
 }
-plot(c(1,3), range(unlist(ll)), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
+plot(c(0,4), range(unlist(ll)[!is.infinite(unlist(ll))]), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
 for (i in 1:length(ll)) {
 	points(a, ll[[i]], type = "l")
 }
@@ -140,13 +140,13 @@ ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
 	mz[(mz/c) > 1] = c[(mz/c) > 1]
-	a = seq(from = 1, to = 3, length = 100)
+	a = seq(from = 0, to = 4, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
 		ll[[j]][i] = Total_LL(mz, c, n, 2, a = a[i])
 	}
 }
-plot(c(1,3), range(unlist(ll)), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
+plot(c(.1,4), range(unlist(ll)[!is.infinite(unlist(ll))]), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
 for (i in 1:length(ll)) {
 	points(a, ll[[i]], type = "l")
 }
