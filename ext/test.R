@@ -2,49 +2,109 @@
 # David Brown
 # brownd7@mskcc.org
 #==================================================
-library("mskmmfgpz")
+library('mskmmfgpz')
+library('reshape2')
+
+'scientific_10' <- function(x) {
+	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
+}
+
+
+data("vb=1")
+
+ll = list()
+ll[[1]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[1]][i] = Total_LL(m, c, n, i, method = "binomial", log = TRUE)
+}
+
+ll[[2]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[2]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = TRUE)
+}
+
+ll[[3]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[3]][i] = Total_LL(m, c, n, i, method = "binomial", log = FALSE)
+}
+
+ll[[4]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[4]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = FALSE)
+}
+
+ll = do.call(cbind, ll) %>%
+     reshape2::melt() %>%
+     dplyr::as_tibble() %>%
+     dplyr::select(LL = value) %>%
+     dplyr::mutate(b = rep(1:4, times = 4),
+		   method = rep(c("Binomial", "Beta-Binomial"), each = 4, times = 2),
+		   log = rep(c("Log", "Non-Log"), each = 8))
+
+plot_ = ll %>%
+	dplyr::mutate(LL = ifelse(LL>1E50, 1E50, LL)) %>%
+	dplyr::mutate(LL = ifelse(LL<(-1E50), -1E50, LL)) %>%
+	ggplot(aes(x = b, y = LL)) +
+	geom_point(stat = "identity", shape = 21, fill = "white", size = 2) +
+	xlab("\n\nb\n") +
+	ylab("\nLL\n\n") +
+	scale_y_continuous(labels = scientific_10) +
+	facet_wrap(~method+log, scales = "free_y")
+
+pdf(file = "vb=1.pdf", width = 7, height = 5)
+print(plot_)
+dev.off()
+
+
 data("vb=2")
 
-'LL' <- function (m_j, c_j, b, rbsb) 
+ll = list()
+ll[[1]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[1]][i] = Total_LL(m, c, n, i, method = "binomial", log = TRUE)
+}
+
+ll[[2]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[2]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = TRUE)
+}
+
+ll[[3]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[3]][i] = Total_LL(m, c, n, i, method = "binomial", log = FALSE)
+}
+
+ll[[4]] = vector(mode = "numeric", length = 4)
+for (i in 1:4) {
+	ll[[4]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = FALSE)
+}
+
+ll = do.call(cbind, ll) %>%
+     reshape2::melt() %>%
+     dplyr::as_tibble() %>%
+     dplyr::select(LL = value) %>%
+     dplyr::mutate(b = rep(1:4, times = 4),
+		   method = rep(c("Binomial", "Beta-Binomial"), each = 4, times = 2),
+		   log = rep(c("Log", "Non-Log"), each = 8))
+
+plot_ = ll %>%
+	dplyr::mutate(LL = ifelse(LL>1E50, 1E50, LL)) %>%
+	dplyr::mutate(LL = ifelse(LL<(-1E50), -1E50, LL)) %>%
+	ggplot(aes(x = b, y = LL)) +
+	geom_point(stat = "identity", shape = 21, fill = "white", size = 2) +
+	xlab("\n\nb\n") +
+	ylab("\nLL\n\n") +
+	scale_y_continuous(labels = scientific_10) +
+	facet_wrap(~method+log, scales = "free_y")
+
+pdf(file = "vb=2.pdf", width = 7, height = 5)
+print(plot_)
+dev.off()
+
+'A_LL' <- function(m_j, c_j, b, a_1)
 {
-    ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]) * rbsb *
-         dbinom(x = c_j - m_j, size = c_j, prob = .MMEnv$v_b[b]) * (1-rbsb)
-    return(invisible(ll))
+	ll = dbeta(x=m_j/c_j, round(c_j*.MMEnv$v_b[b])+1, round(c_j*(1-.MMEnv$v_b[b]))+1, log = TRUE) +
+	     dbeta(x=(c_j-m_j)/c_j, round(c_j*(1-.MMEnv$v_b[b]))+1, round(c_j*.MMEnv$v_b[b])+1, log = TRUE) +
+	     .MMEnv$n_b[b]
+	return(invisible(ll))
 }
-
-'LL2' <- function (m_j, c_j, b, rbsb) 
-{
-    ll = dbeta(x=m_j/c_j, round(c_j*.MMEnv$v_b[b])+1, round(c_j*(1-.MMEnv$v_b[b]))+1) * rbsb *
-         dbeta(x=(c_j-m_j)/c_j, round(c_j*.MMEnv$v_b[b])+1, round(c_j*(1-.MMEnv$v_b[b]))+1) * (1-rbsb)
-    return(invisible(ll))
-}
-
-
-
-'ZZ' <- function(m_j, c_j, a1, a2) {
-	ll = 0
-	rbsb = c(a1, a2, .5, .5)
-	for (b in 1:4) {
-		ll = ll + LL(m_j, c_j, b, rbsb[b])
-	}
-	ll = sum(ll)/sum(rbsb)
-}
-
-a = b = seq(from = .01, to = .99, length = 100)
-ab = matrix(NA, nrow = 100, ncol = 100)
-for (ii in 1:100) {
-	for (jj in 1:100) {
-		ll = vector(mode="numeric", length = n)
-		for (i in 1:n) {
-			ll[i] = ZZ(m[i], c[i], a[ii], b[jj])
-		}
-		ll = sum(log(ll))
-		ab[ii, jj] = ll
-	}
-}
-
-
-par(mar=c(6.1, 6.5, 4.1, 1.1))
-plot(a, la, las = 1, xlab = "", ylab = "")
-mtext(side=1, text=expression(alpha), line=4, cex=1.5)
-mtext(side=2, text=expression(LL), line=4, cex=1.5)
