@@ -2,8 +2,7 @@
 # David Brown
 # brownd7@mskcc.org
 #==================================================
-library('mskmmfgpz')
-library('reshape2')
+library('mosaicm')
 
 'scientific_10' <- function(x) {
 	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
@@ -101,10 +100,53 @@ pdf(file = "vb=2.pdf", width = 7, height = 5)
 print(plot_)
 dev.off()
 
-'A_LL' <- function(m_j, c_j, b, a_1)
+'Asymm_LL' <- function(m_j, c_j, b, a)
 {
-	ll = dbeta(x=m_j/c_j, round(c_j*.MMEnv$v_b[b])+1, round(c_j*(1-.MMEnv$v_b[b]))+1, log = TRUE) +
-	     dbeta(x=(c_j-m_j)/c_j, round(c_j*(1-.MMEnv$v_b[b]))+1, round(c_j*.MMEnv$v_b[b])+1, log = TRUE) +
-	     .MMEnv$n_b[b]
+	ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]*a, log = TRUE) +
+	     dbinom(x = c_j - m_j, size = c_j, prob = (1 - .MMEnv$v_b[b]*a), log = TRUE) +
+	    .MMEnv$n_b[b]
 	return(invisible(ll))
+}
+
+'Total_LL' <- function (m, c, n, b, a)
+{
+	ll = 0
+        for (i in 1:n) {
+            ll = ll + Asymm_LL(m[i], c[i], b, a)
+        }
+	return(invisible(ll))
+}
+
+data("vb=1")
+eps = c(1, 5, 10, 20, 30, 50, 100)
+ll = list()
+for (j in 1:length(eps)) {
+	mz = m + eps[j]
+	mz[(mz/c) > 1] = c[(mz/c) > 1]
+	a = seq(from = 1, to = 3, length = 100)
+	ll[[j]] = vector(mode = "numeric", length = 100)
+	for (i in 1:100) {
+		ll[[j]][i] = Total_LL(mz, c, n, 2, a = a[i])
+	}
+}
+plot(c(1,3), range(unlist(ll)), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
+for (i in 1:length(ll)) {
+	points(a, ll[[i]], type = "l")
+}
+
+data("vb=2")
+eps = c(1, 5, 10, 20, 30, 50, 100)
+ll = list()
+for (j in 1:length(eps)) {
+	mz = m + eps[j]
+	mz[(mz/c) > 1] = c[(mz/c) > 1]
+	a = seq(from = 1, to = 3, length = 100)
+	ll[[j]] = vector(mode = "numeric", length = 100)
+	for (i in 1:100) {
+		ll[[j]][i] = Total_LL(mz, c, n, 2, a = a[i])
+	}
+}
+plot(c(1,3), range(unlist(ll)), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
+for (i in 1:length(ll)) {
+	points(a, ll[[i]], type = "l")
 }

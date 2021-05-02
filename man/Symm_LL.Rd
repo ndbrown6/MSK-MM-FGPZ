@@ -1,5 +1,5 @@
-\name{LL}
-\alias{LL}
+\name{Symm_LL}
+\alias{Symm_LL}
 \title{
 Likelihood of ???
 }
@@ -7,7 +7,7 @@ Likelihood of ???
 Returns the likelihood of ???
 }
 \usage{
-LL(m_j, c_j, n, b)
+Symm_LL(m_j, c_j, n, b)
 }
 \arguments{
 \item{m_j}{???}

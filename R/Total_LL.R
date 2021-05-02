@@ -3,12 +3,12 @@
 	if (log) {
 		ll = 0
 		for (i in 1:n) {
-			ll = ll + LL(m[i], c[i], b, method = method, log = log)
+			ll = ll + Symm_LL(m[i], c[i], b, method = method, log = log)
 		}
 	} else {
 		ll = 1
 		for (i in 1:n) {
-			ll = ll * LL(m[i], c[i], b, method = method, log = log)
+			ll = ll * Symm_LL(m[i], c[i], b, method = method, log = log)
 		}
 	}
 	return(invisible(ll))

@@ -1,4 +1,4 @@
-'LL' <- function(m_j, c_j, b, method = "binomial", log = TRUE)
+'Symm_LL' <- function(m_j, c_j, b, method = "binomial", log = TRUE)
 {
 	if (log) {
 		if (method == "binomial") {
