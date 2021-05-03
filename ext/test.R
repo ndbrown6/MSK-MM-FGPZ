@@ -2,6 +2,7 @@
 # David Brown
 # brownd7@mskcc.org
 #==================================================
+rm(list=ls(all=TRUE))
 library('mosaicm')
 library('ggforce')
 
