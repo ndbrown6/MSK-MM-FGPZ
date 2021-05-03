@@ -109,12 +109,9 @@ dev.off()
 	return(invisible(ll))
 }
 
-'TotalLL' <- function (m, c, n, b, a)
+'TotalLL' <- function (m, c, b, a)
 {
-	ll = 0
-        for (i in 1:n) {
-            ll = ll + AsymmLL(m[i], c[i], b, a)
-        }
+	ll = sum(AsymmLL(m, c, b, a))
 	return(invisible(ll))
 }
 
@@ -127,7 +124,7 @@ for (j in 1:length(eps)) {
 	a = seq(from = 0.1, to = 2, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = TotalLL(mz, c, n, 1, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, 1, a = a[i])
 	}
 }
 ll = dplyr::tibble(LL = unlist(ll),
@@ -156,7 +153,7 @@ for (j in 1:length(eps)) {
 	a = seq(from = 0.1, to = 4, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = TotalLL(mz, c, n, 2, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, 2, a = a[i])
 	}
 }
 ll = dplyr::tibble(LL = unlist(ll),
@@ -175,3 +172,4 @@ plot_ = ll %>%
 pdf(file = "vb=2_eps.pdf", width = 10, height = 5)
 print(plot_)
 dev.off()
+
