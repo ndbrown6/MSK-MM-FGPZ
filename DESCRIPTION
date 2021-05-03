@@ -4,7 +4,7 @@ Version: 0.0-1
 Date: 2021-04-29
 Title: Moasic Mutations
 Author: David Brown <brownd7@mskcc.org>
-Description: Likelihood model for somatic blood-derived mosaic mutations
+Description: Likelihood model for cancer causative mosaic mutations occurring in early embryogenesis
 Maintainer: David Brown <brownd7@mskcc.org>
 URL: https://github.com/ndbrown6/MSK-MM-FGPZ
 Depends: R (>= 3.6.1), dplyr, magrittr, ggplot2, reshape2
