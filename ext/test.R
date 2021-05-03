@@ -11,6 +11,7 @@ library('ggforce')
 }
 
 
+# test functions with simulated data at v_b = 1
 data("vb=1")
 
 ll = list()
@@ -56,7 +57,7 @@ pdf(file = "vb=1.pdf", width = 7, height = 5)
 print(plot_)
 dev.off()
 
-
+# test functions with simulated data at v_b = 2
 data("vb=2")
 
 ll = list()
@@ -102,22 +103,9 @@ pdf(file = "vb=2.pdf", width = 7, height = 5)
 print(plot_)
 dev.off()
 
-'AsymmLL' <- function(m_j, c_j, b, a)
-{
-	ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]*a, log = TRUE) +
-	     dbinom(x = c_j - m_j, size = c_j, prob = (1 - .MMEnv$v_b[b]*a), log = TRUE) +
-	    .MMEnv$n_b[b]
-	return(invisible(ll))
-}
-
-'TotalLL' <- function (m, c, b, a)
-{
-	ll = sum(AsymmLL(m, c, b, a))
-	return(invisible(ll))
-}
-
+# test asymmetric cell divisions with simulated data at v_b = 1
 data("vb=1")
-eps = c(1, 5, 10, 20, 30, 50, 100)
+eps = c(1, 5, 10, 20, 30, 50)
 ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
@@ -125,7 +113,7 @@ for (j in 1:length(eps)) {
 	a = seq(from = 0.1, to = 2, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = TotalLL(mz, c, 1, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, 1, a = a[i], method = "betabinomial", log = TRUE)
 	}
 }
 ll = dplyr::tibble(LL = unlist(ll),
@@ -145,8 +133,9 @@ pdf(file = "vb=1_eps.pdf", width = 10, height = 5)
 print(plot_)
 dev.off()
 
+# test asymmetric cell divisions with simulated data at v_b = 2
 data("vb=2")
-eps = c(1, 5, 10, 20, 30, 50, 100)
+eps = c(1, 5, 10, 20, 30, 50)
 ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
@@ -154,7 +143,7 @@ for (j in 1:length(eps)) {
 	a = seq(from = 0.1, to = 4, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = TotalLL(mz, c, 2, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, 2, a = a[i], method = "betabinomial", log = TRUE)
 	}
 }
 ll = dplyr::tibble(LL = unlist(ll),
@@ -173,4 +162,56 @@ plot_ = ll %>%
 pdf(file = "vb=2_eps.pdf", width = 10, height = 5)
 print(plot_)
 dev.off()
+
+# test asymmetric cell divisions with simulated data at v_b = 1 and expected v_b = 1 or v_b = 2
+data("vb=1")
+eps = c(1, 5, 10, 20, 30, 50)
+
+ll_a = list()
+for (j in 1:length(eps)) {
+	mz = m + eps[j]
+	mz[(mz/c) > 1] = c[(mz/c) > 1]
+	a = seq(from = 0.1, to = 2, length = 100)
+	ll_a[[j]] = vector(mode = "numeric", length = 100)
+	for (i in 1:100) {
+		ll_a[[j]][i] = TotalLL(mz, c, 1, a = a[i], method = "betabinomial", log = TRUE)
+	}
+}
+ll_a = dplyr::tibble(LL_vb1 = unlist(ll_a),
+		     alpha_vb1 = rep(seq(from = 0.1, to = 2, length = 100), times = length(eps)),
+		     eps = rep(eps, each = 100))
+
+ll_b = list()
+for (j in 1:length(eps)) {
+	mz = m + eps[j]
+	mz[(mz/c) > 1] = c[(mz/c) > 1]
+	a = seq(from = 0.1, to = 4, length = 100)
+	ll_b[[j]] = vector(mode = "numeric", length = 100)
+	for (i in 1:100) {
+		ll_b[[j]][i] = TotalLL(mz, c, 2, a = a[i], method = "betabinomial", log = TRUE)
+	}
+}
+ll_b = dplyr::tibble(LL_vb2 = unlist(ll_b),
+		     alpha_vb2 = rep(seq(from = 0.1, to = 4, length = 100), times = length(eps)),
+		     eps = rep(eps, each = 100))
+
+
+plot_ = dplyr::bind_cols(ll_a, ll_b %>% dplyr::select(-eps)) %>%
+	ggplot(aes(x = LL_vb1, y = LL_vb2)) +
+	geom_point(stat = "identity", shape = 21) +
+	xlab("\n\nLL vb1\n") +
+	ylab("\nLL vb2\n\n") +
+	scale_x_continuous(labels = scientific_10) +
+	scale_y_continuous(labels = scientific_10) +
+	facet_wrap(~eps)
+
+
+# test asymmetric cell divisions with simulated data at v_b = 2 and expected v_b = 1 or v_b = 2
+data("vb=2")
+
+ll = vector(mode = "numeric", length = 100)
+a = seq(from = 0, to = 2, length = 100)
+for (i in 1:length(a)) {
+	ll[i] = TotalLL(m, c, 1, a = a[i], method = "betabinomial", log = TRUE) - TotalLL(m, c, 2, method = "betabinomial", log = TRUE)
+}
 
