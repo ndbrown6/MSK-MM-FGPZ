@@ -15,22 +15,22 @@ data("vb=1")
 ll = list()
 ll[[1]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[1]][i] = TotalLL(m, c, n, i, method = "binomial", log = TRUE)
+	ll[[1]][i] = TotalLL(m, c, i, method = "binomial", log = TRUE)
 }
 
 ll[[2]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[2]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = TRUE)
+	ll[[2]][i] = TotalLL(m, c, i, method = "betabinomial", log = TRUE)
 }
 
 ll[[3]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[3]][i] = TotalLL(m, c, n, i, method = "binomial", log = FALSE)
+	ll[[3]][i] = TotalLL(m, c, i, method = "binomial", log = FALSE)
 }
 
 ll[[4]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[4]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = FALSE)
+	ll[[4]][i] = TotalLL(m, c, i, method = "betabinomial", log = FALSE)
 }
 
 ll = do.call(cbind, ll) %>%
@@ -61,22 +61,22 @@ data("vb=2")
 ll = list()
 ll[[1]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[1]][i] = TotalLL(m, c, n, i, method = "binomial", log = TRUE)
+	ll[[1]][i] = TotalLL(m, c, i, method = "binomial", log = TRUE)
 }
 
 ll[[2]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[2]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = TRUE)
+	ll[[2]][i] = TotalLL(m, c, i, method = "betabinomial", log = TRUE)
 }
 
 ll[[3]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[3]][i] = TotalLL(m, c, n, i, method = "binomial", log = FALSE)
+	ll[[3]][i] = TotalLL(m, c, i, method = "binomial", log = FALSE)
 }
 
 ll[[4]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[4]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = FALSE)
+	ll[[4]][i] = TotalLL(m, c, i, method = "betabinomial", log = FALSE)
 }
 
 ll = do.call(cbind, ll) %>%
