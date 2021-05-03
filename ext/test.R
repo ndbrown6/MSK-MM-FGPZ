@@ -3,6 +3,7 @@
 # brownd7@mskcc.org
 #==================================================
 library('mosaicm')
+library('ggforce')
 
 'scientific_10' <- function(x) {
 	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
@@ -14,22 +15,22 @@ data("vb=1")
 ll = list()
 ll[[1]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[1]][i] = Total_LL(m, c, n, i, method = "binomial", log = TRUE)
+	ll[[1]][i] = TotalLL(m, c, n, i, method = "binomial", log = TRUE)
 }
 
 ll[[2]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[2]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = TRUE)
+	ll[[2]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = TRUE)
 }
 
 ll[[3]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[3]][i] = Total_LL(m, c, n, i, method = "binomial", log = FALSE)
+	ll[[3]][i] = TotalLL(m, c, n, i, method = "binomial", log = FALSE)
 }
 
 ll[[4]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[4]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = FALSE)
+	ll[[4]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = FALSE)
 }
 
 ll = do.call(cbind, ll) %>%
@@ -48,7 +49,7 @@ plot_ = ll %>%
 	xlab("\n\nb\n") +
 	ylab("\nLL\n\n") +
 	scale_y_continuous(labels = scientific_10) +
-	facet_wrap(~method+log, scales = "free_y")
+	facet_wrap(method~log, scales = "free_y")
 
 pdf(file = "vb=1.pdf", width = 7, height = 5)
 print(plot_)
@@ -60,22 +61,22 @@ data("vb=2")
 ll = list()
 ll[[1]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[1]][i] = Total_LL(m, c, n, i, method = "binomial", log = TRUE)
+	ll[[1]][i] = TotalLL(m, c, n, i, method = "binomial", log = TRUE)
 }
 
 ll[[2]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[2]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = TRUE)
+	ll[[2]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = TRUE)
 }
 
 ll[[3]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[3]][i] = Total_LL(m, c, n, i, method = "binomial", log = FALSE)
+	ll[[3]][i] = TotalLL(m, c, n, i, method = "binomial", log = FALSE)
 }
 
 ll[[4]] = vector(mode = "numeric", length = 4)
 for (i in 1:4) {
-	ll[[4]][i] = Total_LL(m, c, n, i, method = "betabinomial", log = FALSE)
+	ll[[4]][i] = TotalLL(m, c, n, i, method = "betabinomial", log = FALSE)
 }
 
 ll = do.call(cbind, ll) %>%
@@ -94,13 +95,13 @@ plot_ = ll %>%
 	xlab("\n\nb\n") +
 	ylab("\nLL\n\n") +
 	scale_y_continuous(labels = scientific_10) +
-	facet_wrap(~method+log, scales = "free_y")
+	facet_wrap(method~log, scales = "free_y")
 
 pdf(file = "vb=2.pdf", width = 7, height = 5)
 print(plot_)
 dev.off()
 
-'Asymm_LL' <- function(m_j, c_j, b, a)
+'AsymmLL' <- function(m_j, c_j, b, a)
 {
 	ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]*a, log = TRUE) +
 	     dbinom(x = c_j - m_j, size = c_j, prob = (1 - .MMEnv$v_b[b]*a), log = TRUE) +
@@ -108,11 +109,11 @@ dev.off()
 	return(invisible(ll))
 }
 
-'Total_LL' <- function (m, c, n, b, a)
+'TotalLL' <- function (m, c, n, b, a)
 {
 	ll = 0
         for (i in 1:n) {
-            ll = ll + Asymm_LL(m[i], c[i], b, a)
+            ll = ll + AsymmLL(m[i], c[i], b, a)
         }
 	return(invisible(ll))
 }
@@ -123,16 +124,28 @@ ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
 	mz[(mz/c) > 1] = c[(mz/c) > 1]
-	a = seq(from = 0, to = 4, length = 100)
+	a = seq(from = 0.1, to = 2, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = Total_LL(mz, c, n, 1, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, n, 1, a = a[i])
 	}
 }
-plot(c(0,4), range(unlist(ll)[!is.infinite(unlist(ll))]), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
-for (i in 1:length(ll)) {
-	points(a, ll[[i]], type = "l")
-}
+ll = dplyr::tibble(LL = unlist(ll),
+		   alpha = rep(seq(from = 0.1, to = 2, length = 100), times = length(eps)),
+		   eps = rep(eps, each = 100))
+
+plot_ = ll %>%
+	ggplot(aes(x = alpha, y = LL, color = factor(eps), group = eps)) +
+	geom_line(stat = "identity", size = 1, alpha = .55) +
+	xlab(bquote(atop(" ", alpha))) +
+	ylab("\nLL\n\n") +
+	scale_y_continuous(labels = scientific_10) +
+	facet_zoom(xlim = c(.75, 2), ylim = c(-10000, 0), horizontal = TRUE, show.area = TRUE) +
+	guides(color = guide_legend(title = expression(epsilon)))
+
+pdf(file = "vb=1_eps.pdf", width = 10, height = 5)
+print(plot_)
+dev.off()
 
 data("vb=2")
 eps = c(1, 5, 10, 20, 30, 50, 100)
@@ -140,13 +153,25 @@ ll = list()
 for (j in 1:length(eps)) {
 	mz = m + eps[j]
 	mz[(mz/c) > 1] = c[(mz/c) > 1]
-	a = seq(from = 0, to = 4, length = 100)
+	a = seq(from = 0.1, to = 4, length = 100)
 	ll[[j]] = vector(mode = "numeric", length = 100)
 	for (i in 1:100) {
-		ll[[j]][i] = Total_LL(mz, c, n, 2, a = a[i])
+		ll[[j]][i] = TotalLL(mz, c, n, 2, a = a[i])
 	}
 }
-plot(c(.1,4), range(unlist(ll)[!is.infinite(unlist(ll))]), type = "n", las = 1, xlab = expression(alpha), ylab = "LL", las = 1)
-for (i in 1:length(ll)) {
-	points(a, ll[[i]], type = "l")
-}
+ll = dplyr::tibble(LL = unlist(ll),
+		   alpha = rep(seq(from = 0.1, to = 4, length = 100), times = length(eps)),
+		   eps = rep(eps, each = 100))
+
+plot_ = ll %>%
+	ggplot(aes(x = alpha, y = LL, color = factor(eps), group = eps)) +
+	geom_line(stat = "identity", size = 1, alpha = .55) +
+	xlab(bquote(atop(" ", alpha))) +
+	ylab("\nLL\n\n") +
+	scale_y_continuous(labels = scientific_10) +
+	facet_zoom(xlim = c(.75, 3), ylim = c(-10000, 0), horizontal = TRUE, show.area = TRUE) +
+	guides(color = guide_legend(title = expression(epsilon)))
+
+pdf(file = "vb=2_eps.pdf", width = 10, height = 5)
+print(plot_)
+dev.off()
