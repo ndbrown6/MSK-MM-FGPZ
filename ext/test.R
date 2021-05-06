@@ -201,7 +201,7 @@ for (i in 1:15) {
 ##################################################################
 'AsymmLL' <- function(m_j, c_j, v_b, a)
 {
-	ll = dbinom(x = m_j, size = c_j, prob = v_b*a, log = TRUE)
+	ll = dbinom(x = m_j, size = c_j, prob = v_b, log = TRUE) + a
 	return(invisible(ll))
 }
 
@@ -211,31 +211,37 @@ for (i in 1:15) {
 	return(invisible(ll))
 }
 
-
 # test asymmetric functions with simulated data
 data("vb=1")
-l.m = m
-l.c = c
-l.n = n
-#data("vb=2")
-#m = c(l.m, m[1:2])
-#c = c(l.c, c[1:2])
-#n = l.n + 2
+l.m = m[1:25]
+l.c = c[1:25]
+
+data("vb=2")
+m = c(l.m, m[1:25])
+c = c(l.c, c[1:25])
+
+n = 50
+
+load("~/GitHub/MSK-MM-FGPZ/data/vb=0.RData")
+m = data_$m
+c = data_$c
+n = 38
 
 vb = c(rep(.25, 1), rep(.125, 2), rep(.0625, 4), rep(.03125, 8))
-LL = vector(mode = "numeric", length = 100)
-a = seq(from = 1, to = 4, length = 100)
+LL = matrix(NA, nrow = 100, ncol = 100)
+a1 = seq(from = 1, to = 2, length = 100)
+a2 = seq(from = 1, to = 4, length = 100)
 for (ii in 1:100) {
-	ai = c(1, a[ii], rep(1, 13))
-	for (i in 1:n) {
-		ll0 = ll1 = 0
-		for (j in 1:15) {
-			ll0 = ll0 + TotalLL(m[i], c[i], vb[j], ai[j])
+	a_1 = c(a1[ii], rep(1, 14))
+	for (jj in 1:100) {
+		a_2 = c(1, a2[jj], rep(1, 13))
+		ll0 = ll1 = vector(mode = "numeric", length = n)
+		for (i in 1:n) {
+			for (j in 1:15) {
+				ll0[i] = ll0[i] + TotalLL(m[i], c[i], vb[j], a_1[j])
+				ll1[i] = ll1[i] + TotalLL(m[i], c[i], vb[j], a_2[j])
+			}
 		}
-		for (j in 1:15) {
-			ll1 = ll1 + TotalLL(m[i], c[i], vb[j], 1)
-		}
-		
-		LL[ii] = sum(ll0) - sum(ll1)
+		LL[ii, jj] = sum(ll0) - sum(ll1)
 	}
 }
