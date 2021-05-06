@@ -134,7 +134,8 @@ print(plot_)
 dev.off()
 
 # test asymmetric cell divisions with simulated data at v_b = 2
-data("vb=2")
+data("vb=2")1, method = "betabinomial", log = TRUE - t v_b = 2
+data("vb=2")1, method = "betabinomial", log = TRUE
 eps = c(1, 5, 10, 20, 30, 50)
 ll = list()
 for (j in 1:length(eps)) {
@@ -162,3 +163,8 @@ plot_ = ll %>%
 pdf(file = "vb=2_eps.pdf", width = 10, height = 5)
 print(plot_)
 dev.off()
+
+
+##################################################################
+data("vb=1")
+TotalLL(m, c, 1, method = "betabinomial", log = TRUE) - TotalLL(m, c, 2, 2, method = "betabinomial", log = TRUE)
