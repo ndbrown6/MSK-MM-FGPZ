@@ -1,9 +1,6 @@
 .MMEnv <- new.env()
 
-v_b = c(.25, .125, .0625, .03125)
+v_b = c(rep(.25, 1), rep(.125, 2), rep(.0625, 4), rep(.03125, 8))
 assign("v_b", v_b, envir=.MMEnv)
 
-n_b = c(2, 4, 8, 16)
-assign("n_b", n_b, envir=.MMEnv)
-
-rm(v_b, n_b)
+rm(v_b)

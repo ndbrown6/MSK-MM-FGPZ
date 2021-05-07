@@ -1,23 +1,19 @@
 \name{TotalLL}
 \alias{TotalLL}
 \title{
-Likelihood of ???
+...
 }
 \description{
-Returns the likelihood of ???
+...
 }
 \usage{
-TotalLL(m, c, n, b, method, log)
+TotalLL(m, c, a, b)
 }
 \arguments{
-\item{m_j}{???}
-\item{c_j}{???}
-\item{n}{???}
-\item{b}{???}
-\item{method}{???}
-\item{log}{???}
-}
-\note{
+\item{m}{Integer vector for the number of alternate allele counts}
+\item{c}{Interger vector for the total number of reference and alternate counts}
+\item{a}{...}
+\item{b}{...}
 }
 \value{
 Invisibly the value of the likelihood

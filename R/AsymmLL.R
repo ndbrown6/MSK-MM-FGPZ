@@ -1,21 +1,5 @@
-'AsymmLL' <- function(m_j, c_j, b, a, method = "binomial", log = TRUE)
+'AsymmLL' <- function(m_j, c_j, v_b, a)
 {
-	if (log) {
-		if (method == "binomial") {
-			ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]*a, log = TRUE) +
-		     	     .MMEnv$n_b[b]
-		} else if (method == "betabinomial") {
-			ll = dbeta(x=m_j/c_j, round(c_j*.MMEnv$v_b[b]*a)+1, round(c_j*(1-(.MMEnv$v_b[b]*a)))+1, log = TRUE) +
-			     .MMEnv$n_b[b]
-		}
-	} else {
-		if (method == "binomial") {
-			ll = dbinom(x = m_j, size = c_j, prob = .MMEnv$v_b[b]*a) *
-		     	     .MMEnv$n_b[b]
-		} else if (method == "betabinomial") {
-			ll = dbeta(x=m_j/c_j, round(c_j*.MMEnv$v_b[b]*a)+1, round(c_j*(1-(.MMEnv$v_b[b]*a)))+1) *
-			     .MMEnv$n_b[b]
-		}
-	}
+	ll = VGAM::dbetabinom(x = m_j, size = c_j, prob = v_b*a, rho = 1e-03)
 	return(invisible(ll))
 }

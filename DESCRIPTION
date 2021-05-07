@@ -7,7 +7,7 @@ Author: David Brown <brownd7@mskcc.org>
 Description: Likelihood model for cancer causative mosaic mutations occurring in early embryogenesis
 Maintainer: David Brown <brownd7@mskcc.org>
 URL: https://github.com/ndbrown6/MSK-MM-FGPZ
-Depends: R (>= 3.6.1), dplyr, magrittr, ggplot2, reshape2
+Depends: R (>= 3.6.1), VGAM
 License: GPL (>= 2)
 biocViews:
 LazyLoad: yes
