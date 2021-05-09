@@ -24,7 +24,11 @@
 			rb_prev = rb_est
 			p_bj = matrix(NA, nrow = length(m), ncol = nb)
 			for (v_b in 1:nb) {
-				p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho)*rb_est[v_b]*sb[v_b]*2^v_b
+				if (nb == 4) {
+					p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho)*rb_est[v_b]*sb[v_b]*2^v_b
+				} else if (nb == 15) {
+					p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho)*rb_est[v_b]*sb[v_b]
+				}
 			}
 			p_bj = pmax(p_bj, 1e-20)
 			p_bj = p_bj/apply(p_bj, 1, sum)
@@ -37,9 +41,14 @@
 		wb = apply(p_bj, 2, sum)/sum(p_bj)
 		loglik = matrix(NA, nrow = length(m), ncol = nb)
 		for (v_b in 1:nb) {
-			loglik[,v_b] = log(wb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE) + log(rb_est[v_b]) + log(sb[v_b]) + 2^v_b
+			if (nb == 4) {
+				loglik[,v_b] = log(wb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE) + log(rb_est[v_b]) + log(sb[v_b]) + 2^v_b
+			} else {
+				loglik[,v_b] = log(wb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE) + log(rb_est[v_b]) + log(sb[v_b])
+			}
 		}
-		LL = sum(apply(loglik, 1, function(x_row) { log(sum(exp(x_row - max(x_row)))) + max(x_row)}))
+		#LL = sum(apply(loglik, 1, function(x) { log(sum(exp(x - max(x)))) + max(x) }))
+		LL = sum(apply(loglik, 1, function(x) { sum(exp(x))/sum(rb_est*sb) }))
 		if (LL>LL_b) {
 			LL_b = LL
 			params = list(LL = LL,
