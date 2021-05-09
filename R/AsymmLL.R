@@ -47,7 +47,6 @@
 				loglik[,v_b] = log(wb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE) + log(rb_est[v_b]) + log(sb[v_b])
 			}
 		}
-		#LL = sum(apply(loglik, 1, function(x) { log(sum(exp(x - max(x)))) + max(x) }))
 		LL = sum(apply(loglik, 1, function(x) { sum(exp(x))/sum(rb_est*sb) }))
 		if (LL>LL_b) {
 			LL_b = LL

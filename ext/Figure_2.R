@@ -136,14 +136,14 @@ for (i in 1:100) {
 		LLvb1[i, j] = AsymmLL(m = m, c = c, a = c(a1[i], rep(1,15)), nb = 15)$LL -
 			      AsymmLL(m = m, c = c, a = c(1, a2[j], rep(1,13)), nb = 15)$LL
 		
-		LLvb2[i, j] = AsymmLL(m = m, c = c, a = c(1, a2[i], rep(1,13)), nb = 15)$LL -
-			      AsymmLL(m = m, c = c, a = c(rep(1,3), a3[j], rep(1,11)), nb = 15)$LL
+		#LLvb2[i, j] = AsymmLL(m = m, c = c, a = c(1, a2[i], rep(1,13)), nb = 15)$LL -
+		#	      AsymmLL(m = m, c = c, a = c(rep(1,3), a3[j], rep(1,11)), nb = 15)$LL
 		
-		LLvb3[i, j] = AsymmLL(m = m, c = c, a = c(1, a2[i], rep(1,13)), nb = 15)$LL -
-			      AsymmLL(m = m, c = c, a = c(rep(1,7), a4[j], rep(1,7)), nb = 15)$LL
+		#LLvb3[i, j] = AsymmLL(m = m, c = c, a = c(1, a2[i], rep(1,13)), nb = 15)$LL -
+		#	      AsymmLL(m = m, c = c, a = c(rep(1,7), a4[j], rep(1,7)), nb = 15)$LL
 		
-		LLvb4[i, j] = AsymmLL(m = m, c = c, a = c(rep(1,3), a3[i], rep(1,11)), nb = 15)$LL -
-			      AsymmLL(m = m, c = c, a = c(rep(1,7), a4[j], rep(1,7)), nb = 15)$LL
+		#LLvb4[i, j] = AsymmLL(m = m, c = c, a = c(rep(1,3), a3[i], rep(1,11)), nb = 15)$LL -
+		#	      AsymmLL(m = m, c = c, a = c(rep(1,7), a4[j], rep(1,7)), nb = 15)$LL
 	}
 }
 close(pb)
