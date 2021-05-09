@@ -1,17 +1,19 @@
 \name{SymmLL}
 \alias{SymmLL}
 \title{
-...
+Symmetric Log-Likelihood of mosaic mutations
 }
 \description{
-...
+Symmetric Log-Likelihood of mosaic mutations
 }
 \usage{
-SymmLL(m_j, c_j)
+SymmLL(m, c, nb)
 }
 \arguments{
-\item{m_j}{Integer for the number of alternate allele counts}
-\item{c_j}{Interger for the total number of reference and alternate counts}
+\item{m}{Integer vector of number of alternate allele counts}
+\item{c}{Integer vector of total number of reference and alternate counts}
+\item{nb}{Integer indicating how many branches the model includes.
+	  \eqn{nb = 4} or \eqn{nb = 15}}
 }
 \value{
 Invisibly the value of the likelihood

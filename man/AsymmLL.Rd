@@ -1,19 +1,21 @@
 \name{AsymmLL}
 \alias{AsymmLL}
 \title{
-...
+Asymmetric Log-Likelihood of mosaic mutations
 }
 \description{
-...
+Asymmetric Log-Likelihood of mosaic mutations
 }
 \usage{
-AsymmLL(m_j, c_j, a, b)
+AsymmLL(m, c, a, nb)
 }
 \arguments{
-\item{m_j}{Integer for the number of alternate allele counts}
-\item{c_j}{Interger for the total number of reference and alternate counts}
-\item{a}{...}
-\item{b}{...}
+\item{m}{Integer vector of number of alternate allele counts}
+\item{c}{Integer vector of total number of reference and alternate counts}
+\item{a}{Numeric vector of expected VAF multipliers. The length of
+	 \eqn{a} should be equal to \eqn{nb}}
+\item{nb}{Integer indicating how many branches the model includes.
+	  \eqn{nb = 4} or \eqn{nb = 15}}
 }
 \value{
 Invisibly the value of the likelihood

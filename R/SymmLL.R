@@ -1,5 +1,5 @@
-'SymmLL' <- function(m_j, c_j, v_b)
+'SymmLL' <- function(m, c, nb = 4)
 {
-	ll = VGAM::dbetabinom(x = m_j, size = c_j, prob = v_b, rho = 1e-04)
+	ll = AsymmLL(m = m, c = c, a = rep(1, nb), nb = nb)
 	return(invisible(ll))
 }
