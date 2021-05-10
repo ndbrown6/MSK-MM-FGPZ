@@ -8,10 +8,10 @@
 	vb = .MMEnv$vb*a
 	
 	LL_b = -Inf
-	p_bjr = list()
+	p_bjr = r_br = list()
 	for (r in 1:n_run) {
 		rb_old = rep(-1, times = nb)
-		rb_est = rep(1/nb, times = nb)
+		rb_est = rep(1, times = nb)
 		iter = 0
 		while (iter<max_iter & sum(abs(rb_est-rb_old))>min_dist) {
 			iter = iter + 1
@@ -22,11 +22,10 @@
 			}
 			p_bj = pmax(p_bj, 1e-20)
 			p_bj = p_bj/apply(p_bj, 1, sum)
-			for (v_b in 1:nb) {
-				rb_est[v_b] = sum(m*p_bj[,v_b])/sum(c*p_bj[,v_b])
-			}
+			nb = apply(p_bj, 2, sum)
+			rb_est = nb/??
 		}
-		rb = apply(p_bj, 2, sum)/length(m)
+		rb = apply(p_bj, 2, sum)
 		loglik = matrix(NA, nrow = length(m), ncol = nb)
 		for (v_b in 1:nb) {
 			loglik[,v_b] = log(rb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE)
@@ -39,10 +38,13 @@
 				      p_bj = p_bj)
 		}
 		p_bjr[[r]] = p_bj
+		r_br[[r]] = rb_est
+		
 	}
 	params = list(LL = params$LL,
 		      r_b = params$r_b,
 		      p_bj = params$p_bj,
+		      r_br = r_br,
 		      p_bjr = p_bjr)
 	return(invisible(params))
 }
