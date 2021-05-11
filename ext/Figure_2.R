@@ -92,19 +92,37 @@ print(plot_)
 dev.off()
 
 
-# test asymmetric model with actual data vb = n and nb = 5 cell generations
-n = 25
+# test asymmetric model with actual data vb = n and asymmetry a = 0->1
+n = 100
 a = seq(from = 0, to = 1, length = n)
-LL = matrix(NA, nrow = n, ncol = n)
+LL = vector(mode = "numeric", length = n)
 
 pb = txtProgressBar(min = 1, max = n, style = 3)
 for (i in 1:n) {
 	setTxtProgressBar(pb, i)
+	ai = rep(1-a[i], 15)
+	ai[8] = a[i]
+	LL[i] = AsymmLL(m = m, c = c, a = ai)$LL
+}
+
+
+
+# test asymmetric model with actual data vb = n and asymmetry a = 0->1
+n = 25
+a = seq(from = 0, to = 1, length = n)
+
+LL = matrix(NA, nrow = n, ncol = n)	
+pb = txtProgressBar(min = 1, max = n, style = 3)
+for (i in 1:n) {
+	setTxtProgressBar(pb, i)
 	for (j in 1:n) {
-		ai = rep(1, 15)
+		ai = rep(1-a[i], 15)
 		ai[4] = a[i]
-		ai[8] = a[j]
-		LL[i, j] = AsymmLL(m = m, c = c, a = ai)$LL
+		
+		aj = rep(1-a[j], 15)
+		aj[8] = a[j]
+		
+		LL[i, j] = AsymmLL(m = m, c = c, a = ai)$LL - AsymmLL(m = m, c = c, a = aj)$LL
 	}
 }
 close(pb)

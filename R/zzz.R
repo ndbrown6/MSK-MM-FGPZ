@@ -11,6 +11,5 @@ assign("betab_rho", betab_rho, envir=.MMEnv)
 assign("max_iter", max_iter, envir=.MMEnv)
 assign("min_dist", min_dist, envir=.MMEnv)
 assign("vb", vb, envir=.MMEnv)
-assign("hex_cols", hex_cols, envir=.MMEnv)
 
 rm(list=c("n_run", "betab_rho", "max_iter", "min_dist", "vb"))
