@@ -44,5 +44,4 @@
 		      r_br = r_br,
 		      p_bjr = p_bjr)
 	return(invisible(params))
-	return(invisible(ll))
 }
