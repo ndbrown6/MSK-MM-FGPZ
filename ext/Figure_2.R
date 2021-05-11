@@ -7,11 +7,17 @@ library('mosaicm')
 library('ggplot2')
 library('ggridges')
 
-# test symmetric model with actual data vb = n and nb = 15 branches
 data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
-LL = SymmLL(m = m, c = c)
+hex_cols = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
+
+# test symmetric model with actual data vb = n and nb = 3|4|5|6 cell generations
+LL3 = SymmLL(m = m, c = c, nb = 3)
+LL4 = SymmLL(m = m, c = c, nb = 4)
+LL5 = SymmLL(m = m, c = c, nb = 5)
+LL6 = SymmLL(m = m, c = c, nb = 6)
+P = 1 - pchisq(2*(LL5$LL-LL4$LL),1)
 
 data_ = do.call(rbind, LL$p_bjr) %>%
 	dplyr::as_tibble() %>%
@@ -22,7 +28,7 @@ data_ = do.call(rbind, LL$p_bjr) %>%
 
 plot_ = data_ %>%
 	ggplot(aes(x = V1, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = "#d7191c", color = "#d7191c", alpha = .75) +
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[1], color = hex_cols[1], alpha = .75) +
 	theme_classic() +
 	xlab(bquote(atop(" ", Pr(nu[b] ==1)))) +
 	ylab("") +
@@ -34,8 +40,8 @@ print(plot_)
 dev.off()
 
 plot_ = data_ %>%
-	ggplot(aes(x = V2+V3, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = "#fdae61", color = "#fdae61", alpha = .75) +
+	ggplot(aes(x = V2, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[2], color = hex_cols[2], alpha = .75) +
 	theme_classic() +
 	xlab(bquote(atop(" ", Pr(nu[b] ==2)))) +
 	ylab("") +
@@ -47,8 +53,8 @@ print(plot_)
 dev.off()
 
 plot_ = data_ %>%
-	ggplot(aes(x = V4+V5+V6+V7, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = "#008837", color = "#008837", alpha = .75) +
+	ggplot(aes(x = V3, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[3], color = hex_cols[3], alpha = .75) +
 	theme_classic() +
 	xlab(bquote(atop(" ", Pr(nu[b] ==3)))) +
 	ylab("") +
@@ -60,8 +66,8 @@ print(plot_)
 dev.off()
 
 plot_ = data_ %>%
-	ggplot(aes(x = V8+V9+V10+V11+V12+V13+V14+V15, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = "#2c7bb6", color = "#2c7bb6", alpha = .75) +
+	ggplot(aes(x = V4, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[4], color = hex_cols[4], alpha = .75) +
 	theme_classic() +
 	xlab(bquote(atop(" ", Pr(nu[b] ==4)))) +
 	ylab("") +
@@ -72,17 +78,33 @@ pdf(file = "p(vb=4).pdf", height = 10, width = 5)
 print(plot_)
 dev.off()
 
-# test asymmetric model with actual data vb = n and nb = 15 branches
+plot_ = data_ %>%
+	ggplot(aes(x = V5, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[5], color = hex_cols[5], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==5)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=5).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+
+# test asymmetric model with actual data vb = n and nb = 5 cell generations
 n = 25
-a1 = seq(from = 0, to = 2, length = n)
-a2 = seq(from = 0, to = 4, length = n)
+a = seq(from = 0, to = 1, length = n)
 LL = matrix(NA, nrow = n, ncol = n)
 
 pb = txtProgressBar(min = 1, max = n, style = 3)
 for (i in 1:n) {
 	setTxtProgressBar(pb, i)
 	for (j in 1:n) {
-		LL[i, j] = AsymmLL(m = m, c = c, a = c(a1[i], 1, rep(1,13)))$LL - AsymmLL(m = m, c = c, a = c(1, a2[j], rep(1,13)))$LL
+		ai = rep(1, 15)
+		ai[4] = a[i]
+		ai[8] = a[j]
+		LL[i, j] = AsymmLL(m = m, c = c, a = ai)$LL
 	}
 }
 close(pb)
