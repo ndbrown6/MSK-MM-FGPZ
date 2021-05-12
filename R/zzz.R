@@ -4,7 +4,7 @@ n_run = 100
 betab_rho = 1e-3
 max_iter = 100
 min_dist = 1e-4
-vb = c(.25, .125, .0625, .03125, .015625, .0078125, 0.00390625)
+vb = c(.25, .125, .0625, .03125, .015625, .0078125, .00390625)
 
 assign("n_run", n_run, envir=.MMEnv)
 assign("betab_rho", betab_rho, envir=.MMEnv)
