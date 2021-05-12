@@ -7,17 +7,65 @@ library('mosaicm')
 library('ggplot2')
 library('ggridges')
 
+hex_cols = c("#e41a1c",
+	     "#377eb8",
+	     "#4daf4a",
+	     "#984ea3",
+	     "#ff7f00")
+
+'scientific_10' <- function(x) {
+	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
+}
+
 data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
-hex_cols = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00")
 
-# test symmetric model with actual data vb = n and nb = 3|4|5|6 cell generations
-LL3 = SymmLL(m = m, c = c, nb = 3)
-LL4 = SymmLL(m = m, c = c, nb = 4)
-LL5 = SymmLL(m = m, c = c, nb = 5)
-LL6 = SymmLL(m = m, c = c, nb = 6)
-P = 1 - pchisq(2*(LL5$LL-LL4$LL),1)
+# test symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
+LL = matrix(NA, nrow = 100, ncol = 7)
+pb = txtProgressBar(min = 1, max = 100, style = 3)
+for (i in 1:100) {
+	setTxtProgressBar(pb, i)
+	index = sample(x = 1:length(m), size = length(m), replace = TRUE)
+	for (j in 1:7) {
+		LL[i,j] = SymmLL(m = m[index], c = c[index], nb = j)$LL
+	}
+}
+
+data_ = dplyr::as_tibble(LL) %>%
+	reshape2::melt() %>%
+	dplyr::rename(vb = variable,
+		      LL = value) %>%
+	dplyr::as_tibble() %>%
+	dplyr::mutate(vb = gsub("V", "", vb, fixed=TRUE)) %>%
+	readr::type_convert() %>%
+	dplyr::mutate(n = rep(1:100, times = 7))
+
+plot_ = data_ %>%
+	ggplot(aes(x = vb, y = LL, group = n)) + 
+	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
+	theme_classic() +
+	xlab(bquote(atop(" ", nu[b]))) +
+	ylab("\nSymmetric Log Likelihood\n") +
+	scale_x_continuous(breaks = 1:7,
+			   labels = 1:7) +
+	scale_y_continuous(labels = scientific_10)
+
+pdf(file = "vb_LL.pdf", height = 4, width = 3.5)
+print(plot_)
+dev.off()
+
+LL = vector(mode = "numeric", length = 7)
+for (i in 1:7) {
+	LL[i] = SymmLL(m = m, c = c, nb = i)$LL
+}
+
+P = 1 - pchisq(2*(LL[2]-LL[1]),1)
+P = 1 - pchisq(2*(LL[3]-LL[2]),1)
+P = 1 - pchisq(2*(LL[4]-LL[3]),1)
+P = 1 - pchisq(2*(LL[5]-LL[4]),1)
+
+LL = SymmLL(m = m, c = c, nb = 5)
 
 data_ = do.call(rbind, LL$p_bjr) %>%
 	dplyr::as_tibble() %>%
@@ -91,38 +139,38 @@ pdf(file = "p(vb=5).pdf", height = 10, width = 5)
 print(plot_)
 dev.off()
 
-
-# test asymmetric model with actual data vb = n and asymmetry a = 0->1
-n = 100
-a = seq(from = 0, to = 1, length = n)
-LL = vector(mode = "numeric", length = n)
-
-pb = txtProgressBar(min = 1, max = n, style = 3)
-for (i in 1:n) {
-	setTxtProgressBar(pb, i)
-	ai = rep(1-a[i], 15)
-	ai[8] = a[i]
-	LL[i] = AsymmLL(m = m, c = c, a = ai)$LL
-}
-
-
-
-# test asymmetric model with actual data vb = n and asymmetry a = 0->1
-n = 25
-a = seq(from = 0, to = 1, length = n)
+# test asymmetric model with actual data vb = n and asymmetry a = 0->3
+n = 300
+ai = seq(from = 0, to = 3, length = n)
+aj = seq(from = 0, to = 3, length = n)
 
 LL = matrix(NA, nrow = n, ncol = n)	
 pb = txtProgressBar(min = 1, max = n, style = 3)
 for (i in 1:n) {
 	setTxtProgressBar(pb, i)
 	for (j in 1:n) {
-		ai = rep(1-a[i], 15)
-		ai[4] = a[i]
-		
-		aj = rep(1-a[j], 15)
-		aj[8] = a[j]
-		
-		LL[i, j] = AsymmLL(m = m, c = c, a = ai)$LL - AsymmLL(m = m, c = c, a = aj)$LL
+		a_ij = rep(1, 5)	
+		a_ij[4] = ai[i]
+		a_ij[5] = aj[j]
+		LL[i, j] = AsymmLL(m = m, c = c, a = a_ij, nb=5)$LL
+	}
+}
+close(pb)
+
+# test asymmetric model with actual data vb = n and asymmetry a = 0->3
+n = 300
+ai = seq(from = 0, to = 3, length = n)
+aj = seq(from = 0, to = 3, length = n)
+
+LL = matrix(NA, nrow = n, ncol = n)	
+pb = txtProgressBar(min = 1, max = n, style = 3)
+for (i in 1:n) {
+	setTxtProgressBar(pb, i)
+	for (j in 1:n) {
+		a_i = a_j = rep(1, 5)	
+		a_i[4] = ai[i]
+		a_j[5] = aj[j]
+		LL[i, j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
 	}
 }
 close(pb)
