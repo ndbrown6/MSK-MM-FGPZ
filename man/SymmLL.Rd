@@ -4,19 +4,19 @@
 Symmetric Log-Likelihood of mosaic mutations
 }
 \description{
-Symmetric Log-Likelihood of mosaic mutations
+Computes the Log-Likelihood of mosaic mutations given symmetric
+doubling at all cell generations
 }
 \usage{
-SymmLL(m, c, nb)
+AsymmLL(m, c, nb)
 }
 \arguments{
-\item{m}{Integer vector of number of alternate allele counts}
-\item{c}{Integer vector of total number of reference and alternate counts}
-\item{nb}{Integer indicating how many branches the model includes.
-	  \eqn{nb = 4} or \eqn{nb = 15}}
+\item{m}{Integer vector of alternate allele counts}
+\item{c}{Integer vector of total reference and alternate counts}
+\item{nb}{Integer indicating how many cell generations the model includes}
 }
 \value{
-Invisibly the value of the likelihood
+Invisibly a list with the value of the Log-Likelihood
 }
 \author{
 \cr

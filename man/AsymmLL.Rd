@@ -4,21 +4,20 @@
 Asymmetric Log-Likelihood of mosaic mutations
 }
 \description{
-Asymmetric Log-Likelihood of mosaic mutations
+Computes the Log-Likelihood of mosaic mutations given asymmetric
+doubling at given cell generations
 }
 \usage{
 AsymmLL(m, c, a, nb)
 }
 \arguments{
-\item{m}{Integer vector of number of alternate allele counts}
-\item{c}{Integer vector of total number of reference and alternate counts}
-\item{a}{Numeric vector of expected VAF multipliers. The length of
-	 \eqn{a} should be equal to \eqn{nb}}
-\item{nb}{Integer indicating how many branches the model includes.
-	  \eqn{nb = 4} or \eqn{nb = 15}}
+\item{m}{Integer vector of alternate allele counts}
+\item{c}{Integer vector of total reference and alternate counts}
+\item{a}{Numeric vector of expected VAF multipliers}
+\item{nb}{Integer indicating how many cell generations the model includes}
 }
 \value{
-Invisibly the value of the likelihood
+Invisibly a list with the value of the Log-Likelihood
 }
 \author{
 \cr
