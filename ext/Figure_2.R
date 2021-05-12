@@ -140,37 +140,37 @@ print(plot_)
 dev.off()
 
 # test asymmetric model with actual data vb = n and asymmetry a = 0->3
-n = 300
-ai = seq(from = 0, to = 3, length = n)
-aj = seq(from = 0, to = 3, length = n)
-
-LL = matrix(NA, nrow = n, ncol = n)	
-pb = txtProgressBar(min = 1, max = n, style = 3)
-for (i in 1:n) {
-	setTxtProgressBar(pb, i)
-	for (j in 1:n) {
-		a_ij = rep(1, 5)	
-		a_ij[4] = ai[i]
-		a_ij[5] = aj[j]
-		LL[i, j] = AsymmLL(m = m, c = c, a = a_ij, nb=5)$LL
-	}
-}
-close(pb)
+# n = 300
+# ai = seq(from = 0, to = 3, length = n)
+# aj = seq(from = 0, to = 3, length = n)
+#
+# LL = matrix(NA, nrow = n, ncol = n)	
+# pb = txtProgressBar(min = 1, max = n, style = 3)
+# for (i in 1:n) {
+#	setTxtProgressBar(pb, i)
+#	for (j in 1:n) {
+#		a_ij = rep(1, 5)	
+#		a_ij[4] = ai[i]
+#		a_ij[5] = aj[j]
+#		LL[i, j] = AsymmLL(m = m, c = c, a = a_ij, nb=5)$LL
+#	}
+# }
+# close(pb)
 
 # test asymmetric model with actual data vb = n and asymmetry a = 0->3
-n = 300
-ai = seq(from = 0, to = 3, length = n)
-aj = seq(from = 0, to = 3, length = n)
-
-LL = matrix(NA, nrow = n, ncol = n)	
-pb = txtProgressBar(min = 1, max = n, style = 3)
-for (i in 1:n) {
-	setTxtProgressBar(pb, i)
-	for (j in 1:n) {
-		a_i = a_j = rep(1, 5)	
-		a_i[4] = ai[i]
-		a_j[5] = aj[j]
-		LL[i, j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
-	}
-}
-close(pb)
+# n = 300
+# ai = seq(from = 0, to = 3, length = n)
+# aj = seq(from = 0, to = 3, length = n)
+#
+# LL = matrix(NA, nrow = n, ncol = n)	
+# pb = txtProgressBar(min = 1, max = n, style = 3)
+# for (i in 1:n) {
+#	setTxtProgressBar(pb, i)
+#	for (j in 1:n) {
+#		a_i = a_j = rep(1, 5)	
+#		a_i[4] = ai[i]
+#		a_j[5] = aj[j]
+#		LL[i, j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
+#	}
+# }
+# close(pb)
