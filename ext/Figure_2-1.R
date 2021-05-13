@@ -152,9 +152,10 @@ data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
 	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
 
 plot_ = data_ %>%
-	ggplot(aes(x = UUID, y = 100*VAF, fill = vb)) +
-	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "#AEA79F", linetype = 2) +
+	ggplot(aes(x = UUID, y = 100*VAF, fill = factor(vb))) +
+	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
 	geom_point(stat = "identity", shape = 21, size = 2) +
+	scale_fill_manual(values = hex_cols) +
 	xlab("\n\n") +
 	ylab("\nVAF (%)\n\n") +
 	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
@@ -163,6 +164,6 @@ plot_ = data_ %>%
 	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
 	guides(fill = FALSE)
 	
-pdf(file = "VAF_by_case.pdf", width = 7, height = 5)
+pdf(file = "VAF_by_Variant.pdf", width = 6, height = 5)
 print(plot_)
 dev.off()

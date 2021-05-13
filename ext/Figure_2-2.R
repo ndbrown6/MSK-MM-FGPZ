@@ -34,12 +34,12 @@ aj = seq(from = 0, to = 3, length = n)
 LL = foreach(i=1:n) %dopar% {
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
-		a_ij = rep(1, 5)	
-		a_ij[4] = ai[i]
-		a_ij[5] = aj[j]
-		LL[j] = AsymmLL(m = m, c = c, a = a_ij, nb=5)$LL
+		a_i = a_j = rep(1, 5)	
+		a_i[4] = ai[i]
+		a_j[5] = aj[j]
+		LL[j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
 	}
 	return(invisible(LL))
 }
 
-save(list=ls(all=TRUE), file = "LL_All.RData")
+save(list=ls(all=TRUE), file = "LL_Diff.RData")
