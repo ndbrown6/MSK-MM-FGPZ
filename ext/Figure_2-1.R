@@ -28,14 +28,15 @@ c = data %>% .[["N_Total"]]
 
 # test symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
 LL = matrix(NA, nrow = 100, ncol = 7)
-pb = txtProgressBar(min = 1, max = 100, style = 3)
-for (i in 1:100) {
-	setTxtProgressBar(pb, i)
+LL = foreach(i=1:100) %dopar% {
 	index = sample(x = 1:length(m), size = length(m), replace = TRUE)
+	LL = vector(mode = "numeric", length = 7)
 	for (j in 1:7) {
-		LL[i,j] = SymmLL(m = m[index], c = c[index], nb = j)$LL
+		LL[j] = SymmLL(m = m[index], c = c[index], nb = j)$LL
 	}
+	return(invisible(LL))
 }
+LL = do.call(rbind, LL)
 
 data_ = dplyr::as_tibble(LL) %>%
 	reshape2::melt() %>%
@@ -56,7 +57,7 @@ plot_ = data_ %>%
 			   labels = 1:7) +
 	scale_y_continuous(labels = scientific_10)
 
-pdf(file = "vb_LL.pdf", height = 4, width = 3.5)
+pdf(file = "vb_LL.pdf", height = 3, width = 3)
 print(plot_)
 dev.off()
 
