@@ -35,11 +35,11 @@ LL = foreach(i=1:n) %dopar% {
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
 		a_i = a_j = rep(1, 5)	
-		a_i[1] = ai[i]
-		a_j[2] = aj[j]
+		a_i[2] = ai[i]
+		a_j[3] = aj[j]
 		LL[j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
 	}
 	return(invisible(LL))
 }
 
-save(list=ls(all=TRUE), file = "LL_Diff_1_2.RData")
+save(list=ls(all=TRUE), file = "LL_Diff_2_3.RData")

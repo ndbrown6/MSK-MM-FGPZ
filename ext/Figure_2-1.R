@@ -146,9 +146,9 @@ print(plot_)
 dev.off()
 
 data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
-	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", gsub("p.", "", data$HGVSp_Short)),
+	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
 		      VAF = data$N_Alt/data$N_Total) %>%
-	dplyr::arrange(desc(VAF)) %>%
+	dplyr::arrange(vb, desc(VAF)) %>%
 	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
 
 plot_ = data_ %>%
