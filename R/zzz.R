@@ -1,8 +1,8 @@
 .MMEnv <- new.env()
 
 n_run = 100
-betab_rho = 1e-3
-max_iter = 100
+betab_rho = 1e-4
+max_iter = 1000
 min_dist = 1e-4
 vb = c(.25, .125, .0625, .03125, .015625, .0078125, .00390625)
 

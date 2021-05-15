@@ -147,23 +147,30 @@ dev.off()
 
 data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
 	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
-		      VAF = data$N_Alt/data$N_Total) %>%
+		      VAF = data$N_Alt/data$N_Total,
+		      Variant_Classification = data$Variant_Classification) %>%
 	dplyr::arrange(vb, desc(VAF)) %>%
 	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
 
 plot_ = data_ %>%
-	ggplot(aes(x = UUID, y = 100*VAF, fill = factor(vb))) +
+	ggplot(aes(x = UUID, y = 100*VAF, fill = factor(vb), shape = Variant_Classification)) +
 	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
-	geom_point(stat = "identity", shape = 21, size = 2) +
+	geom_point(stat = "identity", size = 2) +
 	scale_fill_manual(values = hex_cols) +
+	scale_shape_manual(values = c("Frame_Shift_Del" = 21,
+				      "Frame_Shift_Ins" = 22,
+				      "Missense_Mutation" = 23,
+				      "Nonsense_Mutation" = 24,
+				      "Splice_Site" = 25)) +
 	xlab("\n\n") +
 	ylab("\nVAF (%)\n\n") +
 	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
 			   labels = seq(from = 0, to = 25, by = 5)) +
 	theme_classic() +
 	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
-	guides(fill = FALSE)
+	guides(fill = guide_legend(title = bquote(nu[b]), override.aes = list(shape = 21)),
+	       shape = guide_legend(title = "Variant Type"))
 	
-pdf(file = "VAF_by_Variant.pdf", width = 6, height = 5)
+pdf(file = "VAF_by_Variant.pdf", width = 8, height = 5)
 print(plot_)
 dev.off()
