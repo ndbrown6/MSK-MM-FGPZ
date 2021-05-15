@@ -93,7 +93,7 @@ for (i in 3:5) {
 	vb = .MMEnv$vb[1:i]
 	sim_c = sample(x = c, size = n, replace = TRUE)
 	sim_v = rbetabinom(n = n, size = sim_c, prob = sample(x = vb, size = n, prob = LL$r_b/sum(LL$r_b), replace = TRUE))/sim_c
-	dens[[i-2]] = density(sim_v, from=0, to=0.3, adjust = .5)
+	dens[[i-2]] = density(sim_v, from=0, to=0.3, adjust = 1)
 }
 
 plot_ = data_ %>%
@@ -122,7 +122,7 @@ plot_ = data_ %>%
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
 	ylab("\nFrequency\n\n") +
-	scale_x_continuous(limits = c(-0.5,30)) +
+	scale_x_continuous(limits = c(0,30)) +
 	scale_y_continuous(limits = c(0,25)) +
 	theme_classic()
 
