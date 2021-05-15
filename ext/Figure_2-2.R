@@ -43,3 +43,15 @@ LL = foreach(i=1:n) %dopar% {
 }
 
 save(list=ls(all=TRUE), file = "LL_Diff_1_2.RData")
+
+LL = do.call(rbind, LL)
+index = ai>=0.5 & ai<=2
+pdf(file = "LL_Diff_1_2.pdf", width = 5, height = 5.5)
+par(mar=c(6.1, 6.5, 4.1, 1.1))
+image(ai[index]*.MMEnv$vb[1]*100, aj[index]*.MMEnv$vb[2]*100, LL[index,index],
+      xlab = expression("Expected VAF of 1"^st~"cell division"),
+      ylab = expression("Expected VAF of 2"^nd~"cell division"),
+      las=1, col = hcl.colors(35, "YlOrRd", rev = TRUE))
+abline(v = .MMEnv$vb[1]*100, h = .MMEnv$vb[2]*100, lty = 2)
+contour(ai[index]*.MMEnv$vb[1]*100, aj[index]*.MMEnv$vb[2]*100, LL[index,index], add=TRUE, nlevels=15, col = "grey10")
+dev.off()
