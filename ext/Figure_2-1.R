@@ -98,26 +98,26 @@ for (i in 3:5) {
 
 plot_ = data_ %>%
 	ggplot(aes(x = vaf * 100)) +
-	geom_histogram(stat = "bin", bins = 15, fill = "#AEA79F", color = "#777777") +
+	geom_histogram(stat = "bin", bins = 15, fill = "#AEA79F", color = "#777777", alpha = .25) +
 	geom_line(data = dplyr::tibble(x = dens[[1]]$x*100,
 				       y = dens[[1]]$y),
 		  mapping = aes(x = x, y = y),
 		  color = hex_cols[1],
-		  alpha = .55,
+		  alpha = .65,
 		  size = 1,
 		  inherit.aes = FALSE) +
 	geom_line(data = dplyr::tibble(x = dens[[2]]$x*100,
 				       y = dens[[2]]$y),
 		  mapping = aes(x = x, y = y),
 		  color = hex_cols[2],
-		  alpha = .55,
+		  alpha = .65,
 		  size = 1,
 		  inherit.aes = FALSE) +
 	geom_line(data = dplyr::tibble(x = dens[[3]]$x*100,
 				       y = dens[[3]]$y),
 		  mapping = aes(x = x, y = y),
 		  color = hex_cols[5],
-		  alpha = .55,
+		  alpha = .65,
 		  size = 1,
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
