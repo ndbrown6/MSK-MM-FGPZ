@@ -98,7 +98,16 @@ for (i in 3:5) {
 
 plot_ = data_ %>%
 	ggplot(aes(x = vaf * 100)) +
-	geom_histogram(stat = "bin", bins = 15, fill = "#AEA79F", color = "#777777", alpha = .25) +
+	geom_histogram(stat = "bin", bins = 15, fill = "#AEA79F", color = "white", alpha = .45) +
+	geom_segment(data = dplyr::tibble(x = 1,
+					  xend = 30,
+				          y = 0,
+					  yend = 0),
+		  mapping = aes(x = x, y = y, xend = xend, yend = yend),
+		  color = "#AEA79F",
+		  alpha = .45,
+		  inherit.aes = FALSE) +
+	geom_vline(xintercept = .MMEnv$vb[1:5]*100, linetype = 3, size = .25) +
 	geom_line(data = dplyr::tibble(x = dens[[1]]$x*100,
 				       y = dens[[1]]$y),
 		  mapping = aes(x = x, y = y),
@@ -122,7 +131,7 @@ plot_ = data_ %>%
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
 	ylab("\nFrequency\n\n") +
-	scale_x_continuous(limits = c(0,30)) +
+	scale_x_continuous(limits = c(1,30)) +
 	scale_y_continuous(limits = c(0,25)) +
 	theme_classic()
 
