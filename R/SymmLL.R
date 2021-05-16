@@ -1,5 +1,5 @@
 'SymmLL' <- function(m, c, nb)
-{
+{	
 	n_run = .MMEnv$n_run
 	betab_rho = .MMEnv$betab_rho
 	max_iter = .MMEnv$max_iter
@@ -44,5 +44,4 @@
 		      r_br = r_br,
 		      p_bjr = p_bjr)
 	return(invisible(params))
-
 }

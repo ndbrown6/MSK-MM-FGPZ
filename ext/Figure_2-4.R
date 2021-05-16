@@ -35,29 +35,42 @@ LL = foreach(i=1:n) %dopar% {
 	print(i)
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
-		a = rep(1, 62)
+		a = rep(1, 126)
+		# fix first cell division
+		a[1] = .8
 		
-		# third cell division
-		a[7] = ai[i]
+		# fix second cell division
+		a[3] = .8
 		
-		# fourth cell division
-		a[15] = aj[j]
+		# fix third cell division
+		a[7] = 1.28
 		
-		LL[j] = AsymmLL(m = m, c = c, a = a, nb=5)
+		# fix fourth cell division
+		a[15] = 0.64
+		
+		# fifth cell division
+		a[31] = ai[i]
+		
+		# sixth cell division
+		a[63] = aj[j]
+		
+		LL[j] = AsymmLL(m = m, c = c, a = a, nb=6)
 	}
 	return(invisible(LL))
 }
 
-#save(list=ls(all=TRUE), file = "LL_Diff_3_4.RData")
+#save(list=ls(all=TRUE), file = "LL_Diff_2_3.RData")
 
 LL = do.call(rbind, LL)
 index = ai>0 & ai<2
-#pdf(file = "LL_Diff_3_4.pdf", width = 5, height = 5.5)
-par(mar=c(6.1, 6.5, 4.1, 1.1))
-image(ai[index]*.MMEnv$vb[3]*100, aj[index]*.MMEnv$vb[4]*100, LL[index,index],
-      xlab = expression("Expected VAF of 3"^rd~"cell division"),
-      ylab = expression("Expected VAF of 4"^th~"cell division"),
+#pdf(file = "LL_Diff_2_3.pdf", width = 6, height = 6)
+par(mar=c(6.1, 6.5, 4.1, 3.1))
+image(ai[index]*.MMEnv$vb[5]*100, aj[index]*.MMEnv$vb[6]*100, LL[index,index],
+      xlab = expression("Expected VAF of 5"^th~"cell division"),
+      ylab = expression("Expected VAF of 6"^th~"cell division"),
       las=1, col = hcl.colors(35, "YlOrRd", rev = TRUE))
-abline(v = .MMEnv$vb[3]*100, h = .MMEnv$vb[4]*100, lty = 2)
-contour(ai[index]*.MMEnv$vb[3]*100, aj[index]*.MMEnv$vb[4]*100, LL[index,index], add=TRUE, nlevels=5, col = "grey10")
+abline(v = .MMEnv$vb[5]*100, h = .MMEnv$vb[6]*100, lty = 2)
+axis(side = 3, at = pretty(ai[index]*.MMEnv$vb[5]*100, n = 5), labels = pretty(ai[index]*.MMEnv$vb[5]*100, n = 5)/(.MMEnv$vb[5]*100))
+axis(side = 4, at = pretty(aj[index]*.MMEnv$vb[6]*100, n = 5), labels = pretty(aj[index]*.MMEnv$vb[6]*100, n = 5)/(.MMEnv$vb[6]*100), las = 1)
+contour(ai[index]*.MMEnv$vb[5]*100, aj[index]*.MMEnv$vb[6]*100, LL[index,index], add=TRUE, nlevels=5, col = "grey10")
 #dev.off()

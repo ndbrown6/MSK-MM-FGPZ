@@ -11,7 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 
-registerDoMC(12)
+registerDoMC(4)
 
 hex_cols = c("#C1272D",
 	     "#377EB8",
@@ -27,7 +27,7 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-# test symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
+# bootstrap symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
 LL = matrix(NA, nrow = 100, ncol = 7)
 LL = foreach(i=1:100) %dopar% {
 	index = sample(x = 1:length(m), size = rpois(n = 1,lambda = length(m)), replace = TRUE)
@@ -53,12 +53,12 @@ plot_ = data_ %>%
 	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
 	theme_classic() +
 	xlab(bquote(atop(" ", nu[b]))) +
-	ylab("\nSymmetric Log Likelihood\n") +
+	ylab("\nSymmetric Log-Likelihood\n") +
 	scale_x_continuous(breaks = 1:7,
 			   labels = 1:7) +
 	scale_y_continuous(labels = scientific_10)
 
-pdf(file = "vb_LL.pdf", height = 3, width = 3)
+pdf(file = "vb_LL.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
 
@@ -74,10 +74,8 @@ P = 1 - pchisq(2*(LL[5]-LL[4]),1)
 P = 1 - pchisq(2*(LL[6]-LL[5]),1)
 P = 1 - pchisq(2*(LL[7]-LL[6]),1)
 
-# Observed data
+# plot density of symmetric model with actual data vb = n and nb = 3|4|5 cell generations
 data_ = dplyr::tibble(vaf = m/c)
-
-# Simulated data
 n = 1E5
 dens = list()
 for (i in 3:5) {
@@ -122,7 +120,7 @@ plot_ = data_ %>%
 		  size = 1,
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
-	ylab("\nFrequency\n\n") +
+	ylab("\nFrequency\n") +
 	scale_x_continuous(limits = c(1,30)) +
 	scale_y_continuous(limits = c(0,25)) +
 	theme_classic()
@@ -130,6 +128,10 @@ plot_ = data_ %>%
 pdf(file = "vb_H.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
+
+
+# plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
+LL = SymmLL(m = m, c = c, nb = 5)
 
 data_ = do.call(rbind, LL$p_bjr) %>%
 	dplyr::as_tibble() %>%
