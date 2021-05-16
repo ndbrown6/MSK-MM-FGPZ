@@ -23,14 +23,6 @@ hex_cols = c("#C1272D",
 	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
 }
 
-'transparentRgb' <- function (col = "black", alpha = 85)
-{
-	tmp = c(col2rgb(col), alpha, 255)
-	names(tmp) = c("red", "green", "blue", "alpha", "maxColorValue")
-	out = do.call("rgb", as.list(tmp))
-	return(invisible(out))
-}
-
 data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
