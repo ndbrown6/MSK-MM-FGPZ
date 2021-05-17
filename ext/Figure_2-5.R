@@ -9,8 +9,9 @@ library('ggridges')
 library('parallel')
 library('foreach')
 library('doMC')
+library('Hmisc')
 
-registerDoMC(24)
+registerDoMC(4)
 
 hex_cols = c("#e41a1c",
 	     "#377eb8",
@@ -26,32 +27,15 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-# test asymmetric model with actual data vb = n and asymmetry a = 0->3
-n = 300
-ai = seq(from = 0, to = 3, length = n)
-aj = seq(from = 0, to = 3, length = n)
-
-LL = foreach(i=1:n) %dopar% {
-	LL = vector(mode="numeric", length = n)
-	for (j in 1:n) {
-		a_i = a_j = rep(1, 5)	
-		a_i[4] = ai[i]
-		a_j[5] = aj[j]
-		LL[j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
-	}
-	return(invisible(LL))
+# test vb free model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
+LL = vector(mode = "numeric", length = 7)
+for (i in 1:7) {
+	LL[i] = LL(m = m, c = c, nb = i)$LL
 }
 
-save(list=ls(all=TRUE), file = "LL_Diff_4_5.RData")
-
-LL = do.call(rbind, LL)
-index = ai>=.5 & ai<=2
-pdf(file = "LL_Diff_4_5.pdf", width = 5, height = 5.5)
-par(mar=c(6.1, 6.5, 4.1, 1.1))
-image(ai[index]*.MMEnv$vb[4]*100, aj[index]*.MMEnv$vb[5]*100, LL[index,index],
-      xlab = expression("Expected VAF of 4"^th~"cell division"),
-      ylab = expression("Expected VAF of 5"^th~"cell division"),
-      las=1, col = hcl.colors(35, "YlOrRd", rev = TRUE))
-abline(v = .MMEnv$vb[4]*100, h = .MMEnv$vb[5]*100, lty = 2)
-contour(ai[index]*.MMEnv$vb[4]*100, aj[index]*.MMEnv$vb[5]*100, LL[index,index], add=TRUE, nlevels=15, col = "grey10")
-dev.off()
+P = 1 - pchisq(2*(LL[2]-LL[1]),1)
+P = 1 - pchisq(2*(LL[3]-LL[2]),1)
+P = 1 - pchisq(2*(LL[4]-LL[3]),1)
+P = 1 - pchisq(2*(LL[5]-LL[4]),1)
+P = 1 - pchisq(2*(LL[6]-LL[5]),1)
+P = 1 - pchisq(2*(LL[7]-LL[6]),1)

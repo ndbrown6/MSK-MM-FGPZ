@@ -129,6 +129,50 @@ pdf(file = "vb_H.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
 
+# plot VAF of actual data vb = n and nb = 5 cell generations using symmetric model
+LL = SymmLL(m = m, c = c, nb = 5)
+
+data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
+	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
+		      VAF = data$N_Alt/data$N_Total,
+		      N_Alt = data$N_Alt,
+		      N_Total = data$N_Total,
+		      Variant_Classification = data$Variant_Classification) %>%
+	dplyr::arrange(vb, desc(VAF)) %>%
+	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE)) %>%
+	dplyr::mutate(CI95_Lower = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Lower"]) %>%
+	dplyr::mutate(CI95_Upper = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Upper"])
+
+plot_ = data_ %>%
+	dplyr::mutate(Variant_Classification = case_when(
+		Variant_Classification == "Frame_Shift_Del" ~ "Frame Shift Deletion",
+		Variant_Classification == "Frame_Shift_Ins" ~ "Frame Shift Insertion",
+		Variant_Classification == "Missense_Mutation" ~ "Missense Mutation",
+		Variant_Classification == "Nonsense_Mutation" ~ "Nonsense Mutation",
+		Variant_Classification == "Splice_Site" ~ "Splice Site"
+	)) %>%
+	ggplot(aes(x = UUID, y = 100*VAF, ymin = CI95_Lower*100, ymax = CI95_Upper*100, fill = factor(vb), shape = Variant_Classification)) +
+	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
+	geom_pointrange(show.legend = FALSE) +
+	geom_point(stat = "identity", size = 2) +
+	scale_fill_manual(values = hex_cols) +
+	scale_shape_manual(values = c("Frame Shift Deletion" = 21,
+				      "Frame Shift Insertion" = 22,
+				      "Missense Mutation" = 23,
+				      "Nonsense Mutation" = 24,
+				      "Splice Site" = 25)) +
+	xlab("\n\n") +
+	ylab("\nVAF (%)\n\n") +
+	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
+			   labels = seq(from = 0, to = 25, by = 5)) +
+	theme_classic() +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
+	guides(fill = guide_legend(title = bquote(nu[b]), override.aes = list(shape = 21)),
+	       shape = guide_legend(title = "Variant Type"))
+	
+pdf(file = "VAF_by_Variant.pdf", width = 8, height = 6)
+print(plot_)
+dev.off()
 
 # plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
 LL = SymmLL(m = m, c = c, nb = 5)
@@ -204,46 +248,3 @@ plot_ = data_ %>%
 pdf(file = "p(vb=5).pdf", height = 10, width = 5)
 print(plot_)
 dev.off()
-
-data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
-	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
-		      VAF = data$N_Alt/data$N_Total,
-		      N_Alt = data$N_Alt,
-		      N_Total = data$N_Total,
-		      Variant_Classification = data$Variant_Classification) %>%
-	dplyr::arrange(vb, desc(VAF)) %>%
-	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE)) %>%
-	dplyr::mutate(CI95_Lower = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Lower"]) %>%
-	dplyr::mutate(CI95_Upper = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Upper"])
-
-plot_ = data_ %>%
-	dplyr::mutate(Variant_Classification = case_when(
-		Variant_Classification == "Frame_Shift_Del" ~ "Frame Shift Deletion",
-		Variant_Classification == "Frame_Shift_Ins" ~ "Frame Shift Insertion",
-		Variant_Classification == "Missense_Mutation" ~ "Missense Mutation",
-		Variant_Classification == "Nonsense_Mutation" ~ "Nonsense Mutation",
-		Variant_Classification == "Splice_Site" ~ "Splice Site"
-	)) %>%
-	ggplot(aes(x = UUID, y = 100*VAF, ymin = CI95_Lower*100, ymax = CI95_Upper*100, fill = factor(vb), shape = Variant_Classification)) +
-	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
-	geom_pointrange(show.legend = FALSE) +
-	geom_point(stat = "identity", size = 2) +
-	scale_fill_manual(values = hex_cols) +
-	scale_shape_manual(values = c("Frame Shift Deletion" = 21,
-				      "Frame Shift Insertion" = 22,
-				      "Missense Mutation" = 23,
-				      "Nonsense Mutation" = 24,
-				      "Splice Site" = 25)) +
-	xlab("\n\n") +
-	ylab("\nVAF (%)\n\n") +
-	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
-			   labels = seq(from = 0, to = 25, by = 5)) +
-	theme_classic() +
-	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
-	guides(fill = guide_legend(title = bquote(nu[b]), override.aes = list(shape = 21)),
-	       shape = guide_legend(title = "Variant Type"))
-	
-pdf(file = "VAF_by_Variant.pdf", width = 8, height = 6)
-print(plot_)
-dev.off()
-
