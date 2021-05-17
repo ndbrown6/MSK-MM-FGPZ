@@ -8,7 +8,7 @@
 	}
 	
 	betab_rho = .MMEnv$betab_rho
-	vb = .MMEnv$vb15(nb)*a
+	vb = .MMEnv$vb2(nb)*a
 	
 	p_bj = matrix(NA, nrow = length(m), ncol = length(vb))
 	for (v_b in 1:length(vb)) {
