@@ -9,8 +9,9 @@ library('ggridges')
 library('parallel')
 library('foreach')
 library('doMC')
+library('Hmisc')
 
-registerDoMC(24)
+registerDoMC(4)
 
 hex_cols = c("#e41a1c",
 	     "#377eb8",
@@ -26,32 +27,77 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-# test asymmetric model with actual data vb = n and asymmetry a = 0->3
-n = 300
-ai = seq(from = 0, to = 3, length = n)
-aj = seq(from = 0, to = 3, length = n)
+# plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
+LL = LL(m = m, c = c, nb = 5)
 
-LL = foreach(i=1:n) %dopar% {
-	LL = vector(mode="numeric", length = n)
-	for (j in 1:n) {
-		a_i = a_j = rep(1, 5)	
-		a_i[4] = ai[i]
-		a_j[5] = aj[j]
-		LL[j] = AsymmLL(m = m, c = c, a = a_i, nb=5)$LL - AsymmLL(m = m, c = c, a = a_j, nb=5)$LL
-	}
-	return(invisible(LL))
-}
+data_ = do.call(rbind, LL$p_bjr) %>%
+	dplyr::as_tibble() %>%
+	dplyr::mutate(UUID = rep(paste(data$Case_ID, ":", data$Gene_Symbol, ":", data$HGVSp_Short), .MMEnv$n_run),
+		      VAF = rep(data$N_Alt/data$N_Total, .MMEnv$n_run)) %>%
+	dplyr::arrange(VAF) %>%
+	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
 
-save(list=ls(all=TRUE), file = "LL_Diff_4_5.RData")
+plot_ = data_ %>%
+	ggplot(aes(x = V1, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[1], color = hex_cols[1], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==1)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
 
-LL = do.call(rbind, LL)
-index = ai>=.5 & ai<=2
-pdf(file = "LL_Diff_4_5.pdf", width = 5, height = 5.5)
-par(mar=c(6.1, 6.5, 4.1, 1.1))
-image(ai[index]*.MMEnv$vb[4]*100, aj[index]*.MMEnv$vb[5]*100, LL[index,index],
-      xlab = expression("Expected VAF of 4"^th~"cell division"),
-      ylab = expression("Expected VAF of 5"^th~"cell division"),
-      las=1, col = hcl.colors(35, "YlOrRd", rev = TRUE))
-abline(v = .MMEnv$vb[4]*100, h = .MMEnv$vb[5]*100, lty = 2)
-contour(ai[index]*.MMEnv$vb[4]*100, aj[index]*.MMEnv$vb[5]*100, LL[index,index], add=TRUE, nlevels=15, col = "grey10")
+pdf(file = "p(vb=1).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V2, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[2], color = hex_cols[2], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==2)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=2).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V3, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[3], color = hex_cols[3], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==3)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=3).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V4, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[4], color = hex_cols[4], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==4)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=4).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V5, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[5], color = hex_cols[5], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==5)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=5).pdf", height = 10, width = 5)
+print(plot_)
 dev.off()

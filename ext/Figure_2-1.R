@@ -11,7 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 
-registerDoMC(12)
+registerDoMC(4)
 
 hex_cols = c("#C1272D",
 	     "#377EB8",
@@ -27,7 +27,7 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-# test symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
+# bootstrap symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
 LL = matrix(NA, nrow = 100, ncol = 7)
 LL = foreach(i=1:100) %dopar% {
 	index = sample(x = 1:length(m), size = rpois(n = 1,lambda = length(m)), replace = TRUE)
@@ -53,12 +53,12 @@ plot_ = data_ %>%
 	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
 	theme_classic() +
 	xlab(bquote(atop(" ", nu[b]))) +
-	ylab("\nSymmetric Log Likelihood\n") +
+	ylab("\nSymmetric Log-Likelihood\n") +
 	scale_x_continuous(breaks = 1:7,
 			   labels = 1:7) +
 	scale_y_continuous(labels = scientific_10)
 
-pdf(file = "vb_LL.pdf", height = 3, width = 3)
+pdf(file = "vb_LL.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
 
@@ -74,10 +74,8 @@ P = 1 - pchisq(2*(LL[5]-LL[4]),1)
 P = 1 - pchisq(2*(LL[6]-LL[5]),1)
 P = 1 - pchisq(2*(LL[7]-LL[6]),1)
 
-# Observed data
+# plot density of symmetric model with actual data vb = n and nb = 3|4|5 cell generations
 data_ = dplyr::tibble(vaf = m/c)
-
-# Simulated data
 n = 1E5
 dens = list()
 for (i in 3:5) {
@@ -122,7 +120,7 @@ plot_ = data_ %>%
 		  size = 1,
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
-	ylab("\nFrequency\n\n") +
+	ylab("\nFrequency\n") +
 	scale_x_continuous(limits = c(1,30)) +
 	scale_y_continuous(limits = c(0,25)) +
 	theme_classic()
@@ -130,6 +128,54 @@ plot_ = data_ %>%
 pdf(file = "vb_H.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
+
+# plot VAF of actual data vb = n and nb = 5 cell generations using symmetric model
+LL = SymmLL(m = m, c = c, nb = 5)
+
+data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
+	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
+		      VAF = data$N_Alt/data$N_Total,
+		      N_Alt = data$N_Alt,
+		      N_Total = data$N_Total,
+		      Variant_Classification = data$Variant_Classification) %>%
+	dplyr::arrange(vb, desc(VAF)) %>%
+	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE)) %>%
+	dplyr::mutate(CI95_Lower = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Lower"]) %>%
+	dplyr::mutate(CI95_Upper = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Upper"])
+
+plot_ = data_ %>%
+	dplyr::mutate(Variant_Classification = case_when(
+		Variant_Classification == "Frame_Shift_Del" ~ "Frame Shift Deletion",
+		Variant_Classification == "Frame_Shift_Ins" ~ "Frame Shift Insertion",
+		Variant_Classification == "Missense_Mutation" ~ "Missense Mutation",
+		Variant_Classification == "Nonsense_Mutation" ~ "Nonsense Mutation",
+		Variant_Classification == "Splice_Site" ~ "Splice Site"
+	)) %>%
+	ggplot(aes(x = UUID, y = 100*VAF, ymin = CI95_Lower*100, ymax = CI95_Upper*100, fill = factor(vb), shape = Variant_Classification)) +
+	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
+	geom_pointrange(show.legend = FALSE) +
+	geom_point(stat = "identity", size = 2) +
+	scale_fill_manual(values = hex_cols) +
+	scale_shape_manual(values = c("Frame Shift Deletion" = 21,
+				      "Frame Shift Insertion" = 22,
+				      "Missense Mutation" = 23,
+				      "Nonsense Mutation" = 24,
+				      "Splice Site" = 25)) +
+	xlab("\n\n") +
+	ylab("\nVAF (%)\n\n") +
+	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
+			   labels = seq(from = 0, to = 25, by = 5)) +
+	theme_classic() +
+	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
+	guides(fill = guide_legend(title = bquote(nu[b]), override.aes = list(shape = 21)),
+	       shape = guide_legend(title = "Variant Type"))
+	
+pdf(file = "VAF_by_Variant.pdf", width = 8, height = 6)
+print(plot_)
+dev.off()
+
+# plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
+LL = SymmLL(m = m, c = c, nb = 5)
 
 data_ = do.call(rbind, LL$p_bjr) %>%
 	dplyr::as_tibble() %>%
@@ -202,46 +248,3 @@ plot_ = data_ %>%
 pdf(file = "p(vb=5).pdf", height = 10, width = 5)
 print(plot_)
 dev.off()
-
-data_ = dplyr::tibble(vb = apply(LL$p_bj, 1, which.max)) %>%
-	dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short),
-		      VAF = data$N_Alt/data$N_Total,
-		      N_Alt = data$N_Alt,
-		      N_Total = data$N_Total,
-		      Variant_Classification = data$Variant_Classification) %>%
-	dplyr::arrange(vb, desc(VAF)) %>%
-	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE)) %>%
-	dplyr::mutate(CI95_Lower = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Lower"]) %>%
-	dplyr::mutate(CI95_Upper = binconf(x = N_Alt, n = N_Total, alpha = .05)[,"Upper"])
-
-plot_ = data_ %>%
-	dplyr::mutate(Variant_Classification = case_when(
-		Variant_Classification == "Frame_Shift_Del" ~ "Frame Shift Deletion",
-		Variant_Classification == "Frame_Shift_Ins" ~ "Frame Shift Insertion",
-		Variant_Classification == "Missense_Mutation" ~ "Missense Mutation",
-		Variant_Classification == "Nonsense_Mutation" ~ "Nonsense Mutation",
-		Variant_Classification == "Splice_Site" ~ "Splice Site"
-	)) %>%
-	ggplot(aes(x = UUID, y = 100*VAF, ymin = CI95_Lower*100, ymax = CI95_Upper*100, fill = factor(vb), shape = Variant_Classification)) +
-	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
-	geom_pointrange(show.legend = FALSE) +
-	geom_point(stat = "identity", size = 2) +
-	scale_fill_manual(values = hex_cols) +
-	scale_shape_manual(values = c("Frame Shift Deletion" = 21,
-				      "Frame Shift Insertion" = 22,
-				      "Missense Mutation" = 23,
-				      "Nonsense Mutation" = 24,
-				      "Splice Site" = 25)) +
-	xlab("\n\n") +
-	ylab("\nVAF (%)\n\n") +
-	scale_y_continuous(breaks = seq(from = 0, to = 25, by = 5),
-			   labels = seq(from = 0, to = 25, by = 5)) +
-	theme_classic() +
-	theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1)) +
-	guides(fill = guide_legend(title = bquote(nu[b]), override.aes = list(shape = 21)),
-	       shape = guide_legend(title = "Variant Type"))
-	
-pdf(file = "VAF_by_Variant.pdf", width = 8, height = 6)
-print(plot_)
-dev.off()
-
