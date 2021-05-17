@@ -27,15 +27,77 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-# test vb free model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
-LL = vector(mode = "numeric", length = 7)
-for (i in 1:7) {
-	LL[i] = LL(m = m, c = c, nb = i)$LL
-}
+# plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
+LL = LL(m = m, c = c, nb = 5)
 
-P = 1 - pchisq(2*(LL[2]-LL[1]),1)
-P = 1 - pchisq(2*(LL[3]-LL[2]),1)
-P = 1 - pchisq(2*(LL[4]-LL[3]),1)
-P = 1 - pchisq(2*(LL[5]-LL[4]),1)
-P = 1 - pchisq(2*(LL[6]-LL[5]),1)
-P = 1 - pchisq(2*(LL[7]-LL[6]),1)
+data_ = do.call(rbind, LL$p_bjr) %>%
+	dplyr::as_tibble() %>%
+	dplyr::mutate(UUID = rep(paste(data$Case_ID, ":", data$Gene_Symbol, ":", data$HGVSp_Short), .MMEnv$n_run),
+		      VAF = rep(data$N_Alt/data$N_Total, .MMEnv$n_run)) %>%
+	dplyr::arrange(VAF) %>%
+	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
+
+plot_ = data_ %>%
+	ggplot(aes(x = V1, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[1], color = hex_cols[1], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==1)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=1).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V2, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[2], color = hex_cols[2], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==2)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=2).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V3, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[3], color = hex_cols[3], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==3)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=3).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V4, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[4], color = hex_cols[4], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==4)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=4).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = V5, y = UUID, group = UUID)) + 
+	geom_density_ridges(stat = "density_ridges", fill = hex_cols[5], color = hex_cols[5], alpha = .75) +
+	theme_classic() +
+	xlab(bquote(atop(" ", Pr(nu[b] ==5)))) +
+	ylab("") +
+	scale_x_continuous(limits = c(-0.1,1.1),
+			   breaks = c(0, .2, .4, .6, .8, 1))
+
+pdf(file = "p(vb=5).pdf", height = 10, width = 5)
+print(plot_)
+dev.off()
