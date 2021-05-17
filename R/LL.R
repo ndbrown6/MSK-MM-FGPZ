@@ -9,7 +9,7 @@
 	p_bjr = list()
 	for (r in 1:n_run) {
 		vb_old = rep(-1, times = nb)
-		vb_est = runif(n = nb, min = 0, max = 1)
+		vb_est = rep(1/nb, times = nb)
 		iter = 0
 		while (iter<max_iter & sum(abs(vb_est-vb_old))>min_dist) {
 			iter = iter + 1
@@ -32,12 +32,14 @@
 		LL = sum(apply(loglik,1,function(x) log(sum(exp(x - max(x)))) + max(x) ))
 		if (LL>LL_b) {
 			LL_b = LL
+			index = order(vb_est, decreasing = TRUE)
 			params = list(LL = LL,
-				      wb = wb,
-				      vb = vb_est,
-				      p_bj = p_bj)
+				      wb = wb[index],
+				      vb = vb_est[index],
+				      p_bj = p_bj[,index,drop = FALSE])
 		}
-		p_bjr[[r]] = p_bj
+		index = order(vb_est, decreasing = TRUE)
+		p_bjr[[r]] = p_bj[,index,drop = FALSE]
 	}
 	params = list(LL = params$LL,
 		      wb = params$wb,
