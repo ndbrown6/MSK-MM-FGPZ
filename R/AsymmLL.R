@@ -1,6 +1,6 @@
 'AsymmLL' <- function(m, c, a, nb)
 {
-	'SumexpLL' <- function(x)
+	'sumexpll' <- function(x)
 	{
 		mx = max(x)
 		mx + log(sum(exp(x-mx)))
@@ -14,6 +14,6 @@
 	for (v_b in 1:length(vb)) {
 		p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE)
 	}
-	ll = sum(apply(p_bj, 1, SumexpLL))
+	ll = sum(apply(p_bj, 1, sumexpll))
 	return(invisible(ll))
 }

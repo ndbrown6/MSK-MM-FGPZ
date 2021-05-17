@@ -1,4 +1,4 @@
-'LL' <- function(m, c, nb)
+'MixtureBB' <- function(m, c, nb)
 {	
 	n_run = .MMEnv$n_run
 	betab_rho = .MMEnv$betab_rho
@@ -6,10 +6,9 @@
 	min_dist = .MMEnv$min_dist
 	
 	LL_b = -Inf
-	p_bjr = list()
 	for (r in 1:n_run) {
 		vb_old = rep(-1, times = nb)
-		vb_est = rep(1/nb, times = nb)
+		vb_est = runif(n = nb, min = 0, max = 1)
 		iter = 0
 		while (iter<max_iter & sum(abs(vb_est-vb_old))>min_dist) {
 			iter = iter + 1
@@ -29,7 +28,7 @@
 		for (v_b in 1:nb) {
 			loglik[,v_b] = log(wb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb_est[v_b], rho = betab_rho, log = TRUE)
 		}
-		LL = sum(apply(loglik,1,function(x) log(sum(exp(x - max(x)))) + max(x) ))
+		LL = sum(apply(loglik, 1, function(x) { log(sum(exp(x - max(x)))) + max(x) }))
 		if (LL>LL_b) {
 			LL_b = LL
 			index = order(vb_est, decreasing = TRUE)
@@ -38,13 +37,6 @@
 				      vb = vb_est[index],
 				      p_bj = p_bj[,index,drop = FALSE])
 		}
-		index = order(vb_est, decreasing = TRUE)
-		p_bjr[[r]] = p_bj[,index,drop = FALSE]
 	}
-	params = list(LL = params$LL,
-		      wb = params$wb,
-		      vb = params$vb,
-		      p_bj = params$p_bj,
-		      p_bjr = p_bjr)
 	return(invisible(params))
 }

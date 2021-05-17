@@ -13,11 +13,11 @@ library('Hmisc')
 
 registerDoMC(4)
 
-hex_cols = c("#e41a1c",
-	     "#377eb8",
-	     "#4daf4a",
-	     "#984ea3",
-	     "#ff7f00")
+hex_cols = c("#C1272D",
+	     "#377EB8",
+	     "#01A99D",
+	     "#F9ED7D",
+	     "#F49C45")
 
 'scientific_10' <- function(x) {
 	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))

@@ -1,4 +1,4 @@
-'SymmLL' <- function(m, c, nb)
+'SymmBB' <- function(m, c, nb)
 {	
 	n_run = .MMEnv$n_run
 	betab_rho = .MMEnv$betab_rho
@@ -18,7 +18,7 @@
 			rb_old = rb_est
 			p_bj = matrix(NA, nrow = length(m), ncol = nb)
 			for (v_b in 1:nb) {
-				p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho) * rb_est[v_b] * 2^v_b
+				p_bj[,v_b] = VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho) * rb_est[v_b]
 			}
 			p_bj = pmax(p_bj, 1e-20)
 			p_bj = p_bj/apply(p_bj, 1, sum)
@@ -27,7 +27,7 @@
 		rb = apply(p_bj, 2, sum)
 		loglik = matrix(NA, nrow = length(m), ncol = nb)
 		for (v_b in 1:nb) {
-			loglik[,v_b] = log(rb[v_b]) + log(2^v_b) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE)
+			loglik[,v_b] = log(rb[v_b]) + VGAM::dbetabinom(x = m, size = c, prob = vb[v_b], rho = betab_rho, log = TRUE)
 		}
 		LL = sum(apply(loglik, 1, function(x) { log(sum(exp(x))/sum(rb_est)) }))
 		if (LL>LL_b) {
