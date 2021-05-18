@@ -15,7 +15,7 @@ library('Hmisc')
 .MMEnv$n_run = 100
 .MMEnv$max_iter = 100
 
-registerDoMC(4)
+registerDoMC(8)
 
 hex_cols = c("#C1272D",
 	     "#377EB8",

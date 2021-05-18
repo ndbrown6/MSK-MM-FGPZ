@@ -11,7 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 
-registerDoMC(4)
+registerDoMC(8)
 
 hex_cols = c("#C1272D",
 	     "#377EB8",
