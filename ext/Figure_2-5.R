@@ -10,6 +10,7 @@ library('parallel')
 library('foreach')
 library('doMC')
 library('Hmisc')
+library('copynumber')
 
 .MMEnv$min_dist = -Inf
 .MMEnv$n_run = 100
