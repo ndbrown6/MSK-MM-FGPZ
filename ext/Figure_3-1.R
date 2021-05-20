@@ -34,8 +34,8 @@ library('copynumber')
 	return(invisible(x))
 }
 
-data("Log2R")
-data("CytoBand")
+data("r(x)")
+data("hg19")
 
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%
@@ -49,7 +49,7 @@ smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau 
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
-	end = c(end, max(CytoBand$End[CytoBand$Chromosome == j]))
+	end = c(end, max(hg19$End[hg19$Chromosome == j]))
 }
 end = cumsum(end)
 start = rep(0, 22)
@@ -84,7 +84,7 @@ smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau 
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
-	end = c(end, max(CytoBand$End[CytoBand$Chromosome == j]))
+	end = c(end, max(hg19$End[hg19$Chromosome == j]))
 }
 end = cumsum(end)
 start = rep(0, 22)
@@ -119,7 +119,7 @@ smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau 
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
-	end = c(end, max(CytoBand$End[CytoBand$Chromosome == j]))
+	end = c(end, max(hg19$End[hg19$Chromosome == j]))
 }
 end = cumsum(end)
 start = rep(0, 22)
