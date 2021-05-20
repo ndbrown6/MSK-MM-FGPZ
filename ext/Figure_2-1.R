@@ -11,7 +11,9 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 
-registerDoMC(4)
+.MMEnv$min_dist = -Inf
+
+registerDoMC(8)
 
 hex_cols = c("#C1272D",
 	     "#377EB8",
@@ -30,6 +32,7 @@ c = data %>% .[["N_Total"]]
 # bootstrap symmetric model with actual data vb = n and nb = 1|2|3|4|5|6|7 cell generations
 LL = matrix(NA, nrow = 100, ncol = 7)
 LL = foreach(i=1:100) %dopar% {
+	print(i)
 	index = sample(x = 1:length(m), size = rpois(n = 1,lambda = length(m)), replace = TRUE)
 	LL = vector(mode = "numeric", length = 7)
 	for (j in 1:7) {
@@ -49,30 +52,30 @@ data_ = dplyr::as_tibble(LL) %>%
 	dplyr::mutate(n = rep(1:100, times = 7))
 
 plot_ = data_ %>%
-	ggplot(aes(x = vb, y = LL, group = n)) + 
+	ggplot(aes(x = vb, y = LL/1E3, group = n)) + 
 	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
 	theme_classic() +
 	xlab(bquote(atop(" ", nu[b]))) +
-	ylab("\nSymmetric Log-Likelihood\n") +
+	ylab(expression("Symmetric Log-Likelihood ("%.%10^-3~")")) +
 	scale_x_continuous(breaks = 1:7,
 			   labels = 1:7) +
-	scale_y_continuous(labels = scientific_10)
+	scale_y_continuous(breaks = c(0, -1, -2, -3),
+			   labels = c("0", "       -1", "-2", "-3"))
 
 pdf(file = "vb_LL.pdf", height = 4, width = 4)
 print(plot_)
 dev.off()
 
-LL = vector(mode = "numeric", length = 7)
+LL.0 = vector(mode = "numeric", length = 7)
 for (i in 1:7) {
-	LL[i] = SymmLL(m = m, c = c, nb = i)$LL
+	LL.0[i] = SymmLL(m = m, c = c, nb = i)$LL
 }
 
-P = 1 - pchisq(2*(LL[2]-LL[1]),1)
-P = 1 - pchisq(2*(LL[3]-LL[2]),1)
-P = 1 - pchisq(2*(LL[4]-LL[3]),1)
-P = 1 - pchisq(2*(LL[5]-LL[4]),1)
-P = 1 - pchisq(2*(LL[6]-LL[5]),1)
-P = 1 - pchisq(2*(LL[7]-LL[6]),1)
+P.0 = vector(mode = "numeric", length = 6)
+for (i in 1:6) {
+	P.0[i] = 1 - pchisq(2*(LL.0[i+1]-LL.0[i]),1)
+}
+P.0 = p.adjust(P.0, method = "bonferroni")
 
 # plot density of symmetric model with actual data vb = n and nb = 3|4|5 cell generations
 data_ = dplyr::tibble(vaf = m/c)
@@ -120,7 +123,7 @@ plot_ = data_ %>%
 		  size = 1,
 		  inherit.aes = FALSE) +
 	xlab("\nVAF (%)") +
-	ylab("\nFrequency\n") +
+	ylab("Frequency\n\n") +
 	scale_x_continuous(limits = c(1,30)) +
 	scale_y_continuous(limits = c(0,25)) +
 	theme_classic()
@@ -171,80 +174,5 @@ plot_ = data_ %>%
 	       shape = guide_legend(title = "Variant Type"))
 	
 pdf(file = "VAF_by_Variant.pdf", width = 8, height = 6)
-print(plot_)
-dev.off()
-
-# plot posterior densities of symmetric model with actual data vb = n and nb = 5 cell generations
-LL = SymmLL(m = m, c = c, nb = 5)
-
-data_ = do.call(rbind, LL$p_bjr) %>%
-	dplyr::as_tibble() %>%
-	dplyr::mutate(UUID = rep(paste(data$Case_ID, ":", data$Gene_Symbol, ":", data$HGVSp_Short), .MMEnv$n_run),
-		      VAF = rep(data$N_Alt/data$N_Total, .MMEnv$n_run)) %>%
-	dplyr::arrange(VAF) %>%
-	dplyr::mutate(UUID = factor(UUID, levels = unique(UUID), ordered = TRUE))
-
-plot_ = data_ %>%
-	ggplot(aes(x = V1, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = hex_cols[1], color = hex_cols[1], alpha = .75) +
-	theme_classic() +
-	xlab(bquote(atop(" ", Pr(nu[b] ==1)))) +
-	ylab("") +
-	scale_x_continuous(limits = c(-0.1,1.1),
-			   breaks = c(0, .2, .4, .6, .8, 1))
-
-pdf(file = "p(vb=1).pdf", height = 10, width = 5)
-print(plot_)
-dev.off()
-
-plot_ = data_ %>%
-	ggplot(aes(x = V2, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = hex_cols[2], color = hex_cols[2], alpha = .75) +
-	theme_classic() +
-	xlab(bquote(atop(" ", Pr(nu[b] ==2)))) +
-	ylab("") +
-	scale_x_continuous(limits = c(-0.1,1.1),
-			   breaks = c(0, .2, .4, .6, .8, 1))
-
-pdf(file = "p(vb=2).pdf", height = 10, width = 5)
-print(plot_)
-dev.off()
-
-plot_ = data_ %>%
-	ggplot(aes(x = V3, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = hex_cols[3], color = hex_cols[3], alpha = .75) +
-	theme_classic() +
-	xlab(bquote(atop(" ", Pr(nu[b] ==3)))) +
-	ylab("") +
-	scale_x_continuous(limits = c(-0.1,1.1),
-			   breaks = c(0, .2, .4, .6, .8, 1))
-
-pdf(file = "p(vb=3).pdf", height = 10, width = 5)
-print(plot_)
-dev.off()
-
-plot_ = data_ %>%
-	ggplot(aes(x = V4, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = hex_cols[4], color = hex_cols[4], alpha = .75) +
-	theme_classic() +
-	xlab(bquote(atop(" ", Pr(nu[b] ==4)))) +
-	ylab("") +
-	scale_x_continuous(limits = c(-0.1,1.1),
-			   breaks = c(0, .2, .4, .6, .8, 1))
-
-pdf(file = "p(vb=4).pdf", height = 10, width = 5)
-print(plot_)
-dev.off()
-
-plot_ = data_ %>%
-	ggplot(aes(x = V5, y = UUID, group = UUID)) + 
-	geom_density_ridges(stat = "density_ridges", fill = hex_cols[5], color = hex_cols[5], alpha = .75) +
-	theme_classic() +
-	xlab(bquote(atop(" ", Pr(nu[b] ==5)))) +
-	ylab("") +
-	scale_x_continuous(limits = c(-0.1,1.1),
-			   breaks = c(0, .2, .4, .6, .8, 1))
-
-pdf(file = "p(vb=5).pdf", height = 10, width = 5)
 print(plot_)
 dev.off()
