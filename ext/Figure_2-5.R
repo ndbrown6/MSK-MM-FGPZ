@@ -56,7 +56,7 @@ data_ = dplyr::as_tibble(LL) %>%
 
 plot_ = data_ %>%
 	ggplot(aes(x = vb, y = LL/1E3, group = n)) + 
-	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
+	geom_line(stat = "identity", alpha = .35, color = "#AEA79F", size = .25) +
 	geom_line(stat = "identity", mapping = aes(x = vb, y = LL/1E3),
 		  data = data_ %>% dplyr::group_by(vb) %>%
 		  	 	   dplyr::summarize(LL = mean(LL)),

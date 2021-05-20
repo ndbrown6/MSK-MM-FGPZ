@@ -40,7 +40,7 @@ LL = foreach(i=1:n) %dopar% {
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
 		# asymmetry of all branches
-		a = rep(c(LL0$vb/.MMEnv$vb[1:5], 1), each = 2)
+		a = rep(c(LL0$vb/.MMEnv$vb[1:5]), each = 2)
 		a[seq(from = 2, to = 10, by = 2)] = 1
 		
 		# third cell division
@@ -49,7 +49,7 @@ LL = foreach(i=1:n) %dopar% {
 		# fourth cell division
 		a[7] = aj[j]
 		
-		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 6)
+		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 5)
 	}
 	return(invisible(LL))
 }
