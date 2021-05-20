@@ -28,7 +28,7 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
-LL0 = MixtureBB(m = m, c = c, nb = 4)
+LL0 = MixtureBB(m = m, c = c, nb = 5)
 
 # test asymmetric model with actual data vb = n and asymmetry a = 0.5->2
 n = 250
@@ -40,8 +40,8 @@ LL = foreach(i=1:n) %dopar% {
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
 		# asymmetry of all branches
-		a = rep(LL0$vb/2^(-2:-5), each = 2)
-		a[seq(from = 2, to = 8, by = 2)] = 1
+		a = rep(c(LL0$vb/.MMEnv$vb[1:5], 1), each = 2)
+		a[seq(from = 2, to = 10, by = 2)] = 1
 		
 		# first cell division
 		a[1] = ai[i]
@@ -49,7 +49,7 @@ LL = foreach(i=1:n) %dopar% {
 		# second cell division
 		a[3] = aj[j]
 		
-		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 4)
+		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 6)
 	}
 	return(invisible(LL))
 }
