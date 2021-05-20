@@ -156,7 +156,7 @@ plot_ = data_ %>%
 		Variant_Classification == "Splice_Site" ~ "Splice Site"
 	)) %>%
 	ggplot(aes(x = UUID, y = 100*VAF, ymin = CI95_Lower*100, ymax = CI95_Upper*100, fill = factor(vb), shape = Variant_Classification)) +
-	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 1, size = .25) +
+	geom_hline(yintercept = .MMEnv$vb[1:5]*100, colour = "black", linetype = 3, size = .25) +
 	geom_pointrange(show.legend = FALSE) +
 	geom_point(stat = "identity", size = 2) +
 	scale_fill_manual(values = hex_cols) +
