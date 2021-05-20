@@ -57,7 +57,7 @@ plot_ = data_ %>%
 	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
 	theme_classic() +
 	xlab(bquote(atop(" ", nu[b]))) +
-	ylab(expression("Symmetric Log-Likelihood ("%.%10^-3~")")) +
+	ylab(expression("Log-Likelihood ("%.%10^-3~")")) +
 	scale_x_continuous(breaks = 1:7,
 			   labels = 1:7) +
 	scale_y_continuous(breaks = c(0, -1, -2, -3),
