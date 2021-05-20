@@ -12,10 +12,6 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 
-.MMEnv$min_dist = -Inf
-.MMEnv$n_run = 100
-.MMEnv$max_iter = 100
-
 registerDoMC(8)
 
 hex_cols = c("#C1272D",
