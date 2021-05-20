@@ -57,13 +57,27 @@ data_ = dplyr::as_tibble(LL) %>%
 plot_ = data_ %>%
 	ggplot(aes(x = vb, y = LL/1E3, group = n)) + 
 	geom_line(stat = "identity", alpha = .35, color = "#333333", size = .25) +
+	geom_line(stat = "identity", mapping = aes(x = vb, y = LL/1E3),
+		  data = data_ %>% dplyr::group_by(vb) %>%
+		  	 	   dplyr::summarize(LL = mean(LL)),
+		  inherit.aes = FALSE,
+		  color = hex_cols[2],
+		  size = 1) +
+	geom_point(stat = "identity", mapping = aes(x = vb, y = LL/1E3),
+		   data = data_ %>% dplyr::group_by(vb) %>%
+		  	 	    dplyr::summarize(LL = mean(LL)),
+		   inherit.aes = FALSE,
+		   shape = 21,
+		   fill = "white",
+		   color = hex_cols[2],
+		   size = 2) +
 	theme_classic() +
 	xlab(bquote(atop(" ", nu[b]))) +
 	ylab(expression("Log-Likelihood ("%.%10^-3~")")) +
 	scale_x_continuous(breaks = 1:7,
 			   labels = 1:7) +
-	scale_y_continuous(breaks = c(0, -1, -2, -3),
-			   labels = c("0", "       -1", "-2", "-3"))
+	scale_y_continuous(breaks = c(-1.25, -1.00, -.75, -.5, -.25),
+			   labels = c("-1.25", "       -1.00", "-0.75", "-0.50", "-0.25"))
 
 pdf(file = "_vb_LL.pdf", height = 4, width = 4)
 print(plot_)
@@ -143,7 +157,7 @@ sim_c = sample(x = c, size = n, replace = TRUE)
 sim_v = rbetabinom(n = n, size = sim_c, prob = sample(x = vb, size = n, prob = ll$r_b/sum(ll$r_b), replace = TRUE))/sim_c
 dens_x = density(sim_v, from=0, to=0.3, adjust = 1)
 
-.MMEnv$vb = LL[[4]]$vb
+.MMEnv$vb = LL$vb
 ll = SymmBB(m = m, c = c, nb = 4)
 vb = .MMEnv$vb[1:4]
 sim_c = sample(x = c, size = n, replace = TRUE)
