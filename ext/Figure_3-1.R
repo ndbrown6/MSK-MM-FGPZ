@@ -37,17 +37,15 @@ library('copynumber')
 data("Log2R")
 data("CytoBand")
 
-log2r = l2 %>%
-	dplyr::mutate(position = round(.5*(start + end))) %>%
-	dplyr::select(chromosome, position, `MOS1-T`) %>%
-	dplyr::rename(Chromosome = chromosome,
-		      Position = position, 
-		      Log2Ratio = `MOS1-T`) %>%
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `01-T`) %>%
+	dplyr::rename(Log2Ratio = `01-T`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = log2r, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 150, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 150, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
 segmented = prune_segments(x = segmented, n = 10)
-smoothed = winsorize(data = log2r[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
+smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
@@ -62,8 +60,7 @@ for (j in 1:22) {
 	smoothed[smoothed[,"Chromosome"]==j,"Position"] = smoothed[smoothed[,"Chromosome"]==j,"Position"] + start[j]
 }
 col = rep("grey75", nrow(smoothed))
-
-pdf(file = "MOS01-T.pdf", width = 13, height=4)
+pdf(file = "01-T.pdf", width = 13, height=4)
 par(mar=c(5, 5, 4, 2)+.1)
 plot(x = smoothed[,"Position"], y = smoothed[,"Log2Ratio"], type = "p", pch = ".", cex = 1, col = col, axes = FALSE, frame = FALSE, xlab = "", ylab = "", main = "", ylim = c(-2.5,2))
 for (j in 1:nrow(segmented)) {
@@ -75,17 +72,15 @@ axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ti
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
 
-log2r = l2 %>%
-	dplyr::mutate(position = round(.5*(start + end))) %>%
-	dplyr::select(chromosome, position, `MOS8-T1`) %>%
-	dplyr::rename(Chromosome = chromosome,
-		      Position = position, 
-		      Log2Ratio = `MOS8-T1`) %>%
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `08-T1`) %>%
+	dplyr::rename(Log2Ratio = `08-T1`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = log2r, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
 segmented = prune_segments(x = segmented, n = 10)
-smoothed = winsorize(data = log2r[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
+smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
@@ -100,8 +95,7 @@ for (j in 1:22) {
 	smoothed[smoothed[,"Chromosome"]==j,"Position"] = smoothed[smoothed[,"Chromosome"]==j,"Position"] + start[j]
 }
 col = rep("grey75", nrow(smoothed))
-
-pdf(file = "MOS08-T1.pdf", width = 13, height=4)
+pdf(file = "08-T1.pdf", width = 13, height=4)
 par(mar=c(5, 5, 4, 2)+.1)
 plot(x = smoothed[,"Position"], y = smoothed[,"Log2Ratio"], type = "p", pch = ".", cex = 1, col = col, axes = FALSE, frame = FALSE, xlab = "", ylab = "", main = "", ylim = c(-2.5,2))
 for (j in 1:nrow(segmented)) {
@@ -113,17 +107,15 @@ axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ti
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
 
-log2r = l2 %>%
-	dplyr::mutate(position = round(.5*(start + end))) %>%
-	dplyr::select(chromosome, position, `MOS8-T2`) %>%
-	dplyr::rename(Chromosome = chromosome,
-		      Position = position, 
-		      Log2Ratio = `MOS8-T2`) %>%
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `08-T2`) %>%
+	dplyr::rename(Log2Ratio = `08-T2`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = log2r, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
 segmented = prune_segments(x = segmented, n = 10)
-smoothed = winsorize(data = log2r[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
+smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
 for (j in 1:22) {
@@ -138,8 +130,7 @@ for (j in 1:22) {
 	smoothed[smoothed[,"Chromosome"]==j,"Position"] = smoothed[smoothed[,"Chromosome"]==j,"Position"] + start[j]
 }
 col = rep("grey75", nrow(smoothed))
-
-pdf(file = "MOS08-T2.pdf", width = 13, height=4)
+pdf(file = "08-T2.pdf", width = 13, height=4)
 par(mar=c(5, 5, 4, 2)+.1)
 plot(x = smoothed[,"Position"], y = smoothed[,"Log2Ratio"], type = "p", pch = ".", cex = 1, col = col, axes = FALSE, frame = FALSE, xlab = "", ylab = "", main = "", ylim = c(-2.5,2))
 for (j in 1:nrow(segmented)) {
