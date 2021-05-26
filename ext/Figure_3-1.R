@@ -37,6 +37,7 @@ library('copynumber')
 data("r(x)")
 data("hg19")
 
+
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%
 	dplyr::select(Chromosome, Position, `01-T`) %>%
@@ -72,6 +73,7 @@ axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ti
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
 
+
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%
 	dplyr::select(Chromosome, Position, `08-T1`) %>%
@@ -106,6 +108,7 @@ axis(side = 1, at = c(start, end[length(end)]), labels = rep("", length(start)+1
 axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ticks = 1.25)
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
+
 
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%

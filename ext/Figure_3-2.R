@@ -36,20 +36,29 @@ LL0 = SymmBB(m = m, c = c, nb = 4)
 
 blood_variants = dplyr::tibble(nb = apply(LL0$p_bj, 1, which.max)) %>%
 		 dplyr::mutate(vb = LL$vb[nb]) %>%
-		 dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short))
+		 dplyr::mutate(UID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short)) %>%
+		 dplyr::mutate(UUID = paste0(data$Case_ID, " ", UID))
 
 # predict cell generation from actual vb=n data
 data("vb=all")
 
-all_variants = data %>%
-	       dplyr::mutate(`VAF_%` = gsub(pattern = "%", replacement = "", x = `VAF_%`, fixed = TRUE)) %>%
-	       readr::type_convert() %>%
-	       dplyr::mutate(UUID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short)) %>%
-	       dplyr::left_join(blood_variants, by = "UUID") %>%
-	       dplyr::filter(Is_Tissue_Tumor_Normal == "Normal",
-			     Is_Mosaic_Yes_No == "Yes") %>%
-	       dplyr::mutate(cell_asymmetry = `VAF_%`/(vb*100))
+mosaic_variants = data %>%
+		  dplyr::mutate(`VAF_%` = gsub(pattern = "%", replacement = "", x = `VAF_%`, fixed = TRUE)) %>%
+		  readr::type_convert() %>%
+		  dplyr::mutate(UID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short)) %>%
+		  dplyr::mutate(UUID = paste0(Case_ID, " ", UID)) %>%
+		  dplyr::left_join(blood_variants, by = c("UID", "UUID")) %>%
+		  dplyr::filter(Is_Mosaic_Yes_No == "Yes") %>%
+		  dplyr::mutate(cell_asymmetry = `VAF_%`/(vb*100))
 
+cancer_germ_layer = mosaic_variants %>%
+		    dplyr::filter(Is_Mosaic_Yes_No == "Yes",
+				  Is_Tissue_Tumor_Normal == "Tumor") %>%
+		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2)
+
+
+mosaic_variants = mosaic_variants %>%
+		  dplyr::
 
 plot_ = all_variants %>%
 	ggplot(aes(x = Germ_Layer_v2, y = cell_asymmetry)) +
