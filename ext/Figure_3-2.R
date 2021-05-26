@@ -12,6 +12,8 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 
+n = 15
+
 'prune_segments' <- function(x, n = 10)
 {
 	cnm = matrix(NA, nrow = nrow(x), ncol = nrow(x))
@@ -44,7 +46,7 @@ for (i in 1:(ncol(data)-2)) {
 					 	base::data.frame(),
 					 method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 	colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-	segmented = prune_segments(x = segmented, n = 10)
+	segmented = prune_segments(x = segmented, n = n-5)
 
 	for (ii in 1:length(S)) {
 		for (jj in 1:22) {
@@ -81,7 +83,7 @@ data_ = data %>%
 	base::as.data.frame()
 segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-segmented = prune_segments(x = segmented, n = 15)
+segmented = prune_segments(x = segmented, n = n)
 
 S = seq(from = 1, to = 20, by = 1)
 n_st = vector(mode = "numeric", length = length(S))
@@ -115,7 +117,7 @@ data_ = data %>%
 	base::as.data.frame()
 segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-segmented = prune_segments(x = segmented, n = 15)
+segmented = prune_segments(x = segmented, n = n)
 
 S = seq(from = 1, to = 20, by = 1)
 n_st = vector(mode = "numeric", length = length(S))
@@ -149,7 +151,7 @@ data_ = data %>%
 	base::as.data.frame()
 segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-segmented = prune_segments(x = segmented, n = 15)
+segmented = prune_segments(x = segmented, n = n)
 
 S = seq(from = 1, to = 20, by = 1)
 n_st = vector(mode = "numeric", length = length(S))
@@ -182,7 +184,7 @@ plot_ = nst %>%
 		TRUE ~ "No"
 	)) %>%
 	ggplot(aes(x = S, y = lst, group = sample_name, color = hrd)) +
-	geom_step(stat = "identity", size = 1, alpha = .75) +
+	geom_step(stat = "identity", direction = "vh", size = 1, alpha = .75) +
 	geom_vline(xintercept = c(6,11), linetype = 3, size = .5, color = "goldenrod3") +
 	scale_color_manual(values = c("salmon", "steelblue")) +
 	xlab("\n\nSegment size (Mb)\n") +
