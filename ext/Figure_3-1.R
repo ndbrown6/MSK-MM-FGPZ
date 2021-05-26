@@ -81,7 +81,7 @@ data_ = data %>%
 	base::as.data.frame()
 segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-segmented = prune_segments(x = segmented, n = 10)
+segmented = prune_segments(x = segmented, n = 17)
 smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL

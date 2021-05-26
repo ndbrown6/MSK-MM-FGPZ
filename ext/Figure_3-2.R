@@ -57,10 +57,10 @@ cancer_germ_layer = mosaic_variants %>%
 		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2)
 
 
-mosaic_variants = mosaic_variants %>%
-		  dplyr::
-
-plot_ = all_variants %>%
-	ggplot(aes(x = Germ_Layer_v2, y = cell_asymmetry)) +
-	geom_boxplot(stat = "boxplot") +
-	facet_wrap(~Case_ID, scales = "free_x")
+#mosaic_variants = mosaic_variants %>%
+#		  dplyr::
+#
+#plot_ = all_variants %>%
+#	ggplot(aes(x = Germ_Layer_v2, y = cell_asymmetry)) +
+#	geom_boxplot(stat = "boxplot") +
+#	facet_wrap(~Case_ID, scales = "free_x")
