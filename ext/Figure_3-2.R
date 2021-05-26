@@ -12,55 +12,187 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 
-registerDoMC(8)
-
-hex_cols = c("#C1272D",
-	     "#377EB8",
-	     "#01A99D",
-	     "#F9ED7D",
-	     "#F49C45")
-
-'scientific_10' <- function(x) {
-	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
+'prune_segments' <- function(x, n = 10)
+{
+	cnm = matrix(NA, nrow = nrow(x), ncol = nrow(x))
+	for (j in 1:nrow(x)) {
+		cnm[,j] = abs(2^x[j,"Log2Ratio"] - 2^x[,"Log2Ratio"])
+	}
+	cnt = hclust(as.dist(cnm), "average")
+	cnc = cutree(tree = cnt, k = n)
+	for (j in unique(cnc)) {
+		indx = which(cnc==j)
+		if (length(indx)>2) {
+			mcl = mean(x[indx,"Log2Ratio"])
+			scl = sd(x[indx,"Log2Ratio"])
+			ind = which(x[indx,"Log2Ratio"]<(mcl+1.96*scl) & x[indx,"Log2Ratio"]>(mcl-1.96*scl))
+			x[indx[ind],"Log2Ratio"] = mean(x[indx[ind],"Log2Ratio"])
+		} else {
+			x[indx,"Log2Ratio"] = mean(x[indx,"Log2Ratio"])
+		}
+	}
+	return(invisible(x))
 }
 
-# predict cell generation from actual vb=n data
-data("vb=n")
-m = data %>% .[["N_Alt"]]
-c = data %>% .[["N_Total"]]
+data("r(y)")
 
-LL = MixtureBB(m = m, c = c, nb = 4)
-.MMEnv$vb = LL$vb
-.MMEnv$max_iter = 1000
-LL0 = SymmBB(m = m, c = c, nb = 4)
+S = seq(from = 1, to = 20, by = 1)
+nst = matrix(0, nrow = ncol(data)-2, ncol = length(S))
+for (i in 1:(ncol(data)-2)) {
+	segmented = pcf(data = winsorize(data = data %>%
+					 	dplyr::select(all_of(c(1,2,i+2))) %>%
+					 	base::data.frame(),
+					 method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+	colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
+	segmented = prune_segments(x = segmented, n = 10)
 
-blood_variants = dplyr::tibble(nb = apply(LL0$p_bj, 1, which.max)) %>%
-		 dplyr::mutate(vb = LL$vb[nb]) %>%
-		 dplyr::mutate(UID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short)) %>%
-		 dplyr::mutate(UUID = paste0(data$Case_ID, " ", UID))
+	for (ii in 1:length(S)) {
+		for (jj in 1:22) {
+			log2 = subset(segmented, Chromosome == jj)
+			if (nrow(log2)>1) {
+				for (kk in 1:(nrow(log2)-1)) {
+					sx = log2[kk,"End"] - log2[kk,"Start"]
+					sy = log2[kk+1,"End"] - log2[kk+1,"Start"]
+					if (sx >= (S[ii]*10^6) & sy >= (S[ii]*10^6)) {
+						if (log2[kk,"Log2Ratio"]!=log2[kk+1,"Log2Ratio"]) {
+							nst[i,ii] = nst[i,ii] + 1
+						}
+					}
+				}
+			}
+		}
+	}
+}
+nst = t(nst)
+colnames(nst) = colnames(data)[c(-1,-2)]
+nst = dplyr::as_tibble(nst) %>%
+      reshape2::melt() %>%
+      dplyr::as_tibble() %>%
+      dplyr::bind_cols(S = rep(S, times = ncol(data)-2)) %>%
+      dplyr::rename(sample_name = variable,
+		    lst = value)
 
-# predict cell generation from actual vb=n data
-data("vb=all")
+data("r(x)")
 
-mosaic_variants = data %>%
-		  dplyr::mutate(`VAF_%` = gsub(pattern = "%", replacement = "", x = `VAF_%`, fixed = TRUE)) %>%
-		  readr::type_convert() %>%
-		  dplyr::mutate(UID = paste0(data$Gene_Symbol, " ", data$HGVSp_Short)) %>%
-		  dplyr::mutate(UUID = paste0(Case_ID, " ", UID)) %>%
-		  dplyr::left_join(blood_variants, by = c("UID", "UUID")) %>%
-		  dplyr::filter(Is_Mosaic_Yes_No == "Yes") %>%
-		  dplyr::mutate(cell_asymmetry = `VAF_%`/(vb*100))
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `01-T`) %>%
+	dplyr::rename(Log2Ratio = `01-T`) %>%
+	base::as.data.frame()
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
+segmented = prune_segments(x = segmented, n = 15)
 
-cancer_germ_layer = mosaic_variants %>%
-		    dplyr::filter(Is_Mosaic_Yes_No == "Yes",
-				  Is_Tissue_Tumor_Normal == "Tumor") %>%
-		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2)
+S = seq(from = 1, to = 20, by = 1)
+n_st = vector(mode = "numeric", length = length(S))
+for (i in 1:length(S)) {
+	for (j in 1:22) {
+		log2 = subset(segmented, Chromosome == j)
+		if (nrow(log2)>1) {
+			for (k in 1:(nrow(log2)-1)) {
+				sx = log2[k,"End"] - log2[k,"Start"]
+				sy = log2[k+1,"End"] - log2[k+1,"Start"]
+				if (sx >= (S[i]*10^6) & sy >= (S[i]*10^6)) {
+					if (log2[k,"Log2Ratio"]!=log2[k+1,"Log2Ratio"]) {
+						n_st[i] = n_st[i] + 1
+					}
+				}
+			}
+		}
+	}
+}
 
+nst = nst %>%
+      dplyr::bind_rows(
+	      dplyr::tibble(sample_name = rep("01-T", length(n_st)),
+			    lst = n_st,
+			    S = S))
 
-#mosaic_variants = mosaic_variants %>%
-#		  dplyr::
-#
-#plot_ = all_variants %>%
-#	ggplot(aes(x = Germ_Layer_v2, y = cell_asymmetry)) +
-#	geom_boxplot(stat = "boxplot") +
-#	facet_wrap(~Case_ID, scales = "free_x")
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `08-T1`) %>%
+	dplyr::rename(Log2Ratio = `08-T1`) %>%
+	base::as.data.frame()
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
+segmented = prune_segments(x = segmented, n = 15)
+
+S = seq(from = 1, to = 20, by = 1)
+n_st = vector(mode = "numeric", length = length(S))
+for (i in 1:length(S)) {
+	for (j in 1:22) {
+		log2 = subset(segmented, Chromosome == j)
+		if (nrow(log2)>1) {
+			for (k in 1:(nrow(log2)-1)) {
+				sx = log2[k,"End"] - log2[k,"Start"]
+				sy = log2[k+1,"End"] - log2[k+1,"Start"]
+				if (sx >= (S[i]*10^6) & sy >= (S[i]*10^6)) {
+					if (log2[k,"Log2Ratio"]!=log2[k+1,"Log2Ratio"]) {
+						n_st[i] = n_st[i] + 1
+					}
+				}
+			}
+		}
+	}
+}
+
+nst = nst %>%
+      dplyr::bind_rows(
+	      dplyr::tibble(sample_name = rep("08-T1", length(n_st)),
+			    lst = n_st,
+			    S = S))
+
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `08-T2`) %>%
+	dplyr::rename(Log2Ratio = `08-T2`) %>%
+	base::as.data.frame()
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
+segmented = prune_segments(x = segmented, n = 15)
+
+S = seq(from = 1, to = 20, by = 1)
+n_st = vector(mode = "numeric", length = length(S))
+for (i in 1:length(S)) {
+	for (j in 1:22) {
+		log2 = subset(segmented, Chromosome == j)
+		if (nrow(log2)>1) {
+			for (k in 1:(nrow(log2)-1)) {
+				sx = log2[k,"End"] - log2[k,"Start"]
+				sy = log2[k+1,"End"] - log2[k+1,"Start"]
+				if (sx >= (S[i]*10^6) & sy >= (S[i]*10^6)) {
+					if (log2[k,"Log2Ratio"]!=log2[k+1,"Log2Ratio"]) {
+						n_st[i] = n_st[i] + 1
+					}
+				}
+			}
+		}
+	}
+}
+
+nst = nst %>%
+      dplyr::bind_rows(
+	      dplyr::tibble(sample_name = rep("08-T2", length(n_st)),
+			    lst = n_st,
+			    S = S))
+
+plot_ = nst %>%
+	dplyr::mutate(hrd = case_when(
+		sample_name %in% c("01-T", "08-T1", "08-T2") ~ "Yes",
+		TRUE ~ "No"
+	)) %>%
+	ggplot(aes(x = S, y = lst, group = sample_name, color = hrd)) +
+	geom_step(stat = "identity", size = 1, alpha = .75) +
+	geom_vline(xintercept = c(6,11), linetype = 3, size = .5, color = "goldenrod3") +
+	scale_color_manual(values = c("salmon", "steelblue")) +
+	xlab("\n\nSegment size (Mb)\n") +
+	ylab("\nNumber of state transitions\n\n") +
+	scale_y_log10(limits = c(10,75)) +
+	annotation_logticks(side = "l") +
+	theme_classic() +
+	guides(color = guide_legend(title = "HRD"))
+
+pdf(file = "nst.pdf", width = 6, height = 5)
+print(plot_)
+dev.off()
+
