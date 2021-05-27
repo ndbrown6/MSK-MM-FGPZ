@@ -12,6 +12,12 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 
+hex_cols = c("#C1272D",
+	     "#377EB8",
+	     "#01A99D",
+	     "#F9ED7D",
+	     "#F49C45")
+
 n = 15
 
 'prune_segments' <- function(x, n = 10)
@@ -186,7 +192,7 @@ plot_ = nst %>%
 	ggplot(aes(x = S, y = lst, group = sample_name, color = hrd)) +
 	geom_step(stat = "identity", direction = "vh", size = 1, alpha = .75) +
 	geom_vline(xintercept = c(6,11), linetype = 3, size = .5, color = "goldenrod3") +
-	scale_color_manual(values = c("salmon", "steelblue")) +
+	scale_color_manual(values = hex_cols[2:1]) +
 	xlab("\n\nSegment size (Mb)\n") +
 	ylab("\nNumber of state transitions\n\n") +
 	scale_y_log10(limits = c(10,75)) +
@@ -194,7 +200,7 @@ plot_ = nst %>%
 	theme_classic() +
 	guides(color = guide_legend(title = "HRD"))
 
-pdf(file = "nst.pdf", width = 6, height = 5)
+pdf(file = "nst.pdf", width = 6.5, height = 5)
 print(plot_)
 dev.off()
 
