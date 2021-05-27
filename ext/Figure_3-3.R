@@ -58,19 +58,21 @@ ampliseq_variants = readr::read_tsv(file = "~/Desktop/MOSAICISM - Mutation file 
 		    dplyr::select(AMPLISEQ_MAF, AMPLISEQ_ALT_Count, AMPLISEQ_Total_Count, UUID)
 
 mosaic_variants = mosaic_variants %>%
-#		  dplyr::left_join(ampliseq_variants, by = "UUID") %>%
-#		  dplyr::mutate(AMPLISEQ_MAF = AMPLISEQ_MAF * 100) %>%
-#		  dplyr::mutate(`VAF_%` = case_when(
-#		  	is.na(AMPLISEQ_MAF) ~ `VAF_%`,
-#			TRUE ~ AMPLISEQ_MAF
-#		  )) %>%
+		  dplyr::left_join(ampliseq_variants, by = "UUID") %>%
+		  dplyr::mutate(AMPLISEQ_MAF = AMPLISEQ_MAF * 100) %>%
+		  #dplyr::mutate(`VAF_%` = case_when(
+		  #	is.na(AMPLISEQ_MAF) ~ `VAF_%`,
+		  #	TRUE ~ AMPLISEQ_MAF
+		  #)) %>%
+		  dplyr::mutate(`VAF_%` = AMPLISEQ_MAF) %>%
+		  dplyr::filter(!is.na(`VAF_%`)) %>%
 		  dplyr::mutate(cell_asymmetry = `VAF_%`/(vb*100))
-
 
 cancer_germ_layer = mosaic_variants %>%
 		    dplyr::filter(Is_Mosaic_Yes_No == "Yes",
 				  Is_Tissue_Tumor_Normal == "Tumor") %>%
-		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2)
+		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2) %>%
+		    dplyr::filter(!duplicated(paste0(Case_ID, ":", Cancer_Germ_Layer_v2)))
 
 
 mosaic_variants = mosaic_variants %>%
@@ -79,8 +81,7 @@ mosaic_variants = mosaic_variants %>%
 plot_ = mosaic_variants %>%
 	dplyr::mutate(y = cell_asymmetry) %>%
 	dplyr::mutate(x = case_when(
-		Is_Tissue_Tumor_Normal == "Tumor" ~ paste0(Is_Tissue_Tumor_Normal, "\n", Germ_Layer_v1),
-		Germ_Layer_v1 == Cancer_Germ_Layer_v1 ~ paste0(Is_Tissue_Tumor_Normal, "\n", Germ_Layer_v1),
+		Germ_Layer_v2 == Cancer_Germ_Layer_v2 ~ paste0(Is_Tissue_Tumor_Normal, "\n", Germ_Layer_v2),
 		TRUE ~ paste0(Is_Tissue_Tumor_Normal, "\n Other germlayers")
 	)) %>%
 	ggplot(aes(x = x, y = y)) +
@@ -94,4 +95,18 @@ plot_ = mosaic_variants %>%
 pdf(file = "vb_all.pdf", width = 14, height = 9)
 print(plot_)
 dev.off()
+
+#plot_ = mosaic_variants %>%
+#	dplyr::filter(Is_Tissue_Tumor_Normal == "Normal") %>%
+#	ggplot(aes(x = Germ_Layer_v2, y = cell_asymmetry)) +
+#	geom_boxplot(stat = "boxplot", outlier.shape = NA) +
+#	geom_jitter(stat = "identity", width = .10, height = 0, shape = 21, size = 2.5, alpha = .75) +
+#	xlab("\n\nGermlayer\n") +
+#	ylab("\nCell division asymmetry\n\n") +
+#	scale_y_sqrt() +
+#	facet_wrap(~Case_ID, scales = "free")
+#
+#pdf(file = "vb_all.pdf", width = 14, height = 9)
+#print(plot_)
+#dev.off()
 
