@@ -11,6 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
 
 'prune_segments' <- function(x, n = 10)
 {

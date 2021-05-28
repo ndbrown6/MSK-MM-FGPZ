@@ -11,6 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
 
 hex_cols = c("#C1272D",
 	     "#377EB8",

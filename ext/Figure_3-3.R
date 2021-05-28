@@ -11,6 +11,7 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
 
 registerDoMC(8)
 
@@ -48,24 +49,7 @@ mosaic_variants = data %>%
 		  dplyr::mutate(UID = paste0(Case_ID, ":", Gene_Symbol, ":", HGVSp_Short)) %>%
 		  dplyr::mutate(UUID = paste0(Case_ID, ":", Sample_ID, ":", Gene_Symbol, ":", HGVSp_Short)) %>%
 		  dplyr::left_join(blood_variants, by = "UID") %>%
-		  dplyr::filter(Is_Mosaic_Yes_No == "Yes")
-
-# ampliseq_variants = readr::read_tsv(file = "~/Desktop/MOSAICISM - Mutation file - with Ampliseq- 04-25-21 - with zeros.txt", col_names = TRUE, col_types = cols(.default = col_character())) %>%
-#		      readr::type_convert() %>%
-#		      dplyr::mutate(UUID = paste0(Case_ID, ":", Sample_ID, ":", Gene_Symbol, ":", HGVSp_Short)) %>%
-#		      dplyr::filter(!is.na(AMPLISEQ_MAF)) %>%
-#		      dplyr::filter(!(Case_ID %in% c(1, 14))) %>%
-#		      dplyr::select(AMPLISEQ_MAF, AMPLISEQ_ALT_Count, AMPLISEQ_Total_Count, UUID)
-
-mosaic_variants = mosaic_variants %>%
-#		  dplyr::left_join(ampliseq_variants, by = "UUID") %>%
-#		  dplyr::mutate(AMPLISEQ_MAF = AMPLISEQ_MAF * 100) %>%
-#		  dplyr::mutate(`VAF_%` = case_when(
-#		  	is.na(AMPLISEQ_MAF) ~ `VAF_%`,
-#		  	TRUE ~ AMPLISEQ_MAF
-#		  )) %>%
-#		  dplyr::mutate(`VAF_%` = AMPLISEQ_MAF) %>%
-#		  dplyr::filter(!is.na(`VAF_%`)) %>%
+		  dplyr::filter(Is_Mosaic_Yes_No == "Yes") %>%
 		  dplyr::mutate(cell_asymmetry = `VAF_%`/(vb*100))
 
 cancer_germ_layer = mosaic_variants %>%
@@ -74,25 +58,38 @@ cancer_germ_layer = mosaic_variants %>%
 		    dplyr::select(Case_ID, Cancer_Germ_Layer_v1 = Germ_Layer_v1, Cancer_Germ_Layer_v2 = Germ_Layer_v2) %>%
 		    dplyr::filter(!duplicated(paste0(Case_ID, ":", Cancer_Germ_Layer_v2)))
 
-
 mosaic_variants = mosaic_variants %>%
 		  dplyr::left_join(cancer_germ_layer, by = "Case_ID")
 
-plot_ = mosaic_variants %>%
+data_ = mosaic_variants %>%
 	dplyr::mutate(y = cell_asymmetry) %>%
 	dplyr::mutate(x = case_when(
 		Germ_Layer_v2 == Cancer_Germ_Layer_v2 ~ Is_Tissue_Tumor_Normal,
 		TRUE ~ "Other"
 	)) %>%
-	dplyr::mutate(x = factor(x, levels = c("Other", "Normal", "Tumor"), ordered = TRUE)) %>%
+	dplyr::mutate(x = case_when(
+		x == "Tumor" ~ "Tumor",
+		x == "Normal" ~ "Tumor-matched\ngerm layer",
+		x == "Other" ~ "Other non-tumor\ngerm layers"
+	)) %>%
+	dplyr::mutate(x = factor(x, levels = c("Other non-tumor\ngerm layers", "Tumor-matched\ngerm layer", "Tumor"), ordered = TRUE))
+
+plot_ = data_ %>%
 	ggplot(aes(x = x, y = y)) +
 	geom_boxplot(stat = "boxplot", outlier.shape = NA) +
-	geom_jitter(stat = "identity", width = .10, height = 0, size = 2.5, alpha = .75) +
-	xlab("\n\nGermlayer\n") +
+	geom_jitter(data = data_, mapping = aes(x = x, y = y, color = factor(Case_ID), shape = factor(Germ_Layer_v2)),
+		    stat = "identity", width = .10, height = 0, size = 2.5, alpha = .85, inherit.aes = FALSE) +
+	xlab("") +
 	ylab("\nCell division asymmetry\n\n") +
-	scale_y_sqrt() +
-	#facet_wrap(~Case_ID, scales = "free")
+	scale_y_sqrt(breaks = c(1, 5, 10, 15, 20),
+		     labels = c(1, 5, 10, 15, 20)) +
+	theme_classic() +
+	guides(color = guide_legend(title = "Patient"),
+	       shape = guide_legend(title = "Germ layer")) +
+	geom_signif(stat = "signif", test = "wilcox.test", test.args = list(exact = FALSE),
+		    y_position = sqrt(10),
+		    comparison = list(c("Other non-tumor\ngerm layers", "Tumor-matched\ngerm layer")))
 
-pdf(file = "vb_all.pdf", width = 5, height = 5)
+pdf(file = "vb_all.pdf", width = 6, height = 5)
 print(plot_)
 dev.off()
