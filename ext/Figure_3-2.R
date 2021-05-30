@@ -185,9 +185,43 @@ nst = nst %>%
 			    lst = n_st,
 			    S = S))
 
+data_ = data %>%
+	dplyr::mutate(Position = round(.5*(Start + End))) %>%
+	dplyr::select(Chromosome, Position, `31-T`) %>%
+	dplyr::rename(Log2Ratio = `31-T`) %>%
+	base::as.data.frame()
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
+segmented = prune_segments(x = segmented, n = n)
+
+S = seq(from = 1, to = 20, by = 1)
+n_st = vector(mode = "numeric", length = length(S))
+for (i in 1:length(S)) {
+	for (j in 1:22) {
+		log2 = subset(segmented, Chromosome == j)
+		if (nrow(log2)>1) {
+			for (k in 1:(nrow(log2)-1)) {
+				sx = log2[k,"End"] - log2[k,"Start"]
+				sy = log2[k+1,"End"] - log2[k+1,"Start"]
+				if (sx >= (S[i]*10^6) & sy >= (S[i]*10^6)) {
+					if (log2[k,"Log2Ratio"]!=log2[k+1,"Log2Ratio"]) {
+						n_st[i] = n_st[i] + 1
+					}
+				}
+			}
+		}
+	}
+}
+
+nst = nst %>%
+      dplyr::bind_rows(
+	      dplyr::tibble(sample_name = rep("31-T", length(n_st)),
+			    lst = n_st,
+			    S = S))
+
 plot_ = nst %>%
 	dplyr::mutate(hrd = case_when(
-		sample_name %in% c("01-T", "08-T1", "08-T2") ~ "Yes",
+		sample_name %in% c("01-T", "08-T1", "08-T2", "31-T") ~ "Yes",
 		TRUE ~ "No"
 	)) %>%
 	ggplot(aes(x = S, y = lst, group = sample_name, color = hrd)) +
