@@ -12,6 +12,8 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 library('ggsignif')
+library('diverse')
+library('diverse')
 
 hex_cols = c("#C1272D",
 	     "#377EB8",

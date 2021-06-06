@@ -12,6 +12,7 @@ library('doMC')
 library('Hmisc')
 library('copynumber')
 library('ggsignif')
+library('diverse')
 
 registerDoMC(8)
 
