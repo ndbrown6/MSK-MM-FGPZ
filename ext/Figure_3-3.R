@@ -78,14 +78,15 @@ data_ = mosaic_variants %>%
 plot_ = data_ %>%
 	ggplot(aes(x = x, y = y)) +
 	geom_boxplot(stat = "boxplot", outlier.shape = NA) +
-	geom_jitter(data = data_, mapping = aes(x = x, y = y, color = factor(Case_ID), shape = factor(Germ_Layer_v2)),
+	geom_jitter(data = data_, mapping = aes(x = x, y = y, fill = factor(Case_ID), shape = factor(Germ_Layer_v2)),
 		    stat = "identity", width = .10, height = 0, size = 2.5, alpha = .85, inherit.aes = FALSE) +
+	scale_shape_manual(values = 21:24) +
 	xlab("") +
 	ylab("\nCell division asymmetry\n\n") +
 	scale_y_sqrt(breaks = c(1, 5, 10, 15, 20),
 		     labels = c(1, 5, 10, 15, 20)) +
 	theme_classic() +
-	guides(color = guide_legend(title = "Patient"),
+	guides(fill = guide_legend(title = "Patient", override.aes = list(shape = 21)),
 	       shape = guide_legend(title = "Germ layer")) +
 	geom_signif(stat = "signif", test = "wilcox.test", test.args = list(exact = FALSE),
 		    y_position = sqrt(10),
