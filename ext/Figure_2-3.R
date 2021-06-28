@@ -73,3 +73,6 @@ axis(side = 4, at = seq(from = 0.85, to = 3.65, length = 5)*.MMEnv$vb[4]*100, la
 contour(ai*.MMEnv$vb[3]*100, aj*.MMEnv$vb[4]*100, LL, add = TRUE, nlevels = 5, col = "grey10")
 box()
 dev.off()
+
+LL.1 = SymmLL(m = m, c = c, nb = 5)
+P = 1 - pchisq(2*(max(LL)-LL.1$LL), 2)

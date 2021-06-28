@@ -58,6 +58,11 @@ mosaic_variants = mosaic_variants %>%
 diverse_index = diversity(data = mosaic_variants, type = c("gini-simpson", "entropy"))
 pander::pander(diverse_index[,c("gini.simpson", "entropy")])
 
+smry_ = mosaic_variants %>%
+	dplyr::group_by(Case_ID) %>%	
+	dplyr::summarize(sigma = var(cell_asymmetry),
+			 mu = mean(cell_asymmetry))
+
 data_ = dplyr::as_tibble(mosaic_variants) %>%
 	dplyr::left_join(dplyr::tibble(Case_ID = rownames(diverse_index),
 				       Gini_Simpson = diverse_index[,"gini.simpson"]), by = "Case_ID")
@@ -91,5 +96,36 @@ plot_ = data_ %>%
 	       shape = guide_legend(title = "Germ layer", order = 1))
 
 pdf(file = "vb_shannon.pdf", width = 6, height = 5)
+print(plot_)
+dev.off()
+
+data_ = dplyr::as_tibble(mosaic_variants) %>%
+	dplyr::left_join(smry_, by = "Case_ID")
+
+plot_ = data_ %>%
+	ggplot(aes(x = sigma, y = cell_asymmetry, fill = Case_ID, shape = Germ_Layer_v2)) +
+	geom_point(stat = "identity") +
+	scale_shape_manual(values = 21:24) +
+	xlab(expression(sigma^2)) +
+	ylab("\nCell division asymmetry\n\n") +
+	theme_classic() +
+	guides(fill = guide_legend(title = "Patient", override.aes = list(shape = 21), order = 2),
+	       shape = guide_legend(title = "Germ layer", order = 1))
+
+pdf(file = "vb_sigma.pdf", width = 6, height = 5)
+print(plot_)
+dev.off()
+
+plot_ = data_ %>%
+	ggplot(aes(x = mu, y = cell_asymmetry, fill = Case_ID, shape = Germ_Layer_v2)) +
+	geom_point(stat = "identity") +
+	scale_shape_manual(values = 21:24) +
+	xlab(expression(mu)) +
+	ylab("\nCell division asymmetry\n\n") +
+	theme_classic() +
+	guides(fill = guide_legend(title = "Patient", override.aes = list(shape = 21), order = 2),
+	       shape = guide_legend(title = "Germ layer", order = 1))
+
+pdf(file = "vb_mu.pdf", width = 6, height = 5)
 print(plot_)
 dev.off()
