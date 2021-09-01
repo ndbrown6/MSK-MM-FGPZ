@@ -5,4 +5,4 @@
 &nbsp;
 &nbsp;
 
-![Front page](https://github.com/ndbrown6/MSK-MM-FGPZ/blob/master/ext/somefigure.png)
+![Front page](https://github.com/ndbrown6/MSK-MM-FGPZ/blob/master/ext/pfff.png)
