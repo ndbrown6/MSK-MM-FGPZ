@@ -1,8 +1,13 @@
+#==================================================
+# David Brown
+# brownd7@mskcc.org
+#==================================================
+rm(list=ls(all=TRUE))
 library("viridis")
 library("pwr")
 
+########## VAF versus coverage
 n_len = 1000
-
 p1 = seq(from = 0.01125, to = 0.25, length = n_len)
 p2 = 10E-4
 power = c(0.8, 0.9, 0.95, 0.99, 0.999)
@@ -30,9 +35,8 @@ mtext(side = 2, text = "Coverage", line = 5, cex = 1)
 box(lwd = 2)
 dev.off()
 
-
+########## VAF versus power
 n_len = 1000
-
 p1 = seq(from = 0.001, to = 0.25, length = n_len)
 p2 = 10E-4
 n = c(20, 30, 40, 50, 100, 500, 1000)
@@ -59,3 +63,12 @@ mtext(side = 1, text = "VAF (%)", line = 4, cex = 1)
 mtext(side = 2, text = "Probability", line = 5, cex = 1)
 box(lwd = 2)
 dev.off()
+
+########## coverage versus power
+n_len = 1000
+p1 = 0.015
+p2 = 10E-4
+power = .8
+
+n = pwr.p.test(h = ES.h(p1 = p1, p2 = p2), sig.level = 0.05, power = power, alternative = "greater")$n
+power = pwr.p.test(h = ES.h(p1 = p1, p2 = p2), sig.level = 0.05, n = 250, alternative = "greater")$power

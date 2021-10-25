@@ -1,3 +1,9 @@
+#==================================================
+# David Brown
+# brownd7@mskcc.org
+#==================================================
+rm(list=ls(all=TRUE))
+
 'fsq' <- function(alpha, beta, s_q, q_t)
 {
 	return(invisible(((alpha*s_q) + beta)/((alpha*q_t)+(1-alpha)*2)))
