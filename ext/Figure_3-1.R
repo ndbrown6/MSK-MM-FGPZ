@@ -36,9 +36,14 @@ library('diverse')
 	return(invisible(x))
 }
 
+'absolute_copynumber' <- function(x, alpha, psi, c = 1)
+{
+	y = (1/alpha) * ((2^(x/c))*((psi*alpha) + 2*(1-alpha)) - 2*(1-alpha))
+	return(invisible(y))
+}
+
 data("r(x)")
 data("hg19")
-
 
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%
@@ -75,6 +80,31 @@ axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ti
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
 
+resi = matrix(NA, nrow = 100, ncol = 100)
+alpha = seq(from = .1, to = 1, length = 100)
+psi = seq(from = 1.5, to = 4, length = 100)
+for (i in 1:length(alpha)) {
+	for (j in 1:length(psi)) {
+		abs_cn = absolute_copynumber(x = segmented$Log2Ratio, alpha = alpha[i], psi = psi[j], c = 1)
+		resi[j,i] = sum(abs(round(abs_cn) - abs_cn) * (segmented$End - segmented$Start)/sum(segmented$End - segmented$Start))
+	}
+}
+
+pdf(file = "01-T(2).pdf")
+image(x = psi, y = alpha, z = resi,
+      col = rev(colorRampPalette(RColorBrewer::brewer.pal(10, "RdBu"))(256)),
+      las = 1,
+      xlab = expression(psi),
+      ylab = expression(alpha),
+      main = "MOS01-T")
+abline(h = 0.41, col = "green", lty = 2)
+abline(v = 2.67, col = "green", lty = 2)
+dev.off()
+
+abs_cn = round(absolute_copynumber(x = segmented$Log2Ratio, alpha = .41, psi = 2.67, c = 1))
+index = abs_cn!=2
+prop_alt = segmented[index,,drop=FALSE]
+sum(prop_alt$End - prop_alt$Start)/sum(segmented$End - segmented$Start)
 
 data_ = data %>%
 	dplyr::mutate(Position = round(.5*(Start + End))) %>%
@@ -110,6 +140,33 @@ axis(side = 1, at = c(start, end[length(end)]), labels = rep("", length(start)+1
 axis(side = 1, at = .5*(start+end), labels = c(1:22), tcl = -.5, lwd = 0, lwd.ticks = 1.25)
 mtext(side = 2, text = expression(Log[2]~"Ratio"), line = 3.15, cex = 1.25)
 dev.off()
+
+
+resi = matrix(NA, nrow = 100, ncol = 100)
+alpha = seq(from = .1, to = 1, length = 100)
+psi = seq(from = 1.5, to = 4, length = 100)
+for (i in 1:length(alpha)) {
+	for (j in 1:length(psi)) {
+		abs_cn = absolute_copynumber(x = segmented$Log2Ratio, alpha = alpha[i], psi = psi[j], c = 1)
+		resi[j,i] = sum(abs(round(abs_cn) - abs_cn) * (segmented$End - segmented$Start)/sum(segmented$End - segmented$Start))
+	}
+}
+
+pdf(file = "08-T1(2).pdf")
+image(x = psi, y = alpha, z = resi,
+      col = rev(colorRampPalette(RColorBrewer::brewer.pal(10, "RdBu"))(256)),
+      las = 1,
+      xlab = expression(psi),
+      ylab = expression(alpha),
+      main = "MOS08-T1")
+abline(h = 0.36, col = "green", lty = 2)
+abline(v = 2.15, col = "green", lty = 2)
+dev.off()
+
+abs_cn = round(absolute_copynumber(x = segmented$Log2Ratio, alpha = .36, psi = 2.15, c = 1))
+index = abs_cn!=2
+prop_alt = segmented[index,,drop=FALSE]
+sum(prop_alt$End - prop_alt$Start)/sum(segmented$End - segmented$Start)
 
 
 data_ = data %>%
