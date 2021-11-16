@@ -22,8 +22,7 @@ plot(0, 0, type = "n", xlab = expression(beta), ylab = "Tumor / Blood VAF Ratio"
 for (i in 1:length(alpha)) {
 	points(beta, fsq_t[[i]]/fsq_b, type = "l", col = "#772953")
 }
-abline(h = 2, col = "#B6AFA8", lwd = 2, lty = 1)
-abline(h = 1.5, col = "#B6AFA8", lwd = 2, lty = 2)
+abline(h = 1.5, col = "#B6AFA8", lwd = 2, lty = 1)
 rect(xleft = .2, xright = .22, ybottom = 3, ytop = 20, col = "white", border = "white")
 text(x = .21, y = 5, labels = "0.2", col = "#772953", cex = .55)
 text(x = .21, y = 6.25, labels = "0.3", col = "#772953", cex = .55)
@@ -47,8 +46,7 @@ plot(0, 0, type = "n", xlab = expression(beta^b), ylab = "Tumor / Blood VAF Rati
 for (i in 1:length(beta_t)) {
 	points(beta_b, fsq_t[[i]]/fsq_b, type = "l", col = "#772953")
 }
-abline(h = 2, col = "#B6AFA8", lwd = 2, lty = 1)
-abline(h = 1.5, col = "#B6AFA8", lwd = 2, lty = 2)
+abline(h = 1.5, col = "#B6AFA8", lwd = 2, lty = 1)
 rect(xleft = .2, xright = .22, ybottom = 2.2, ytop = 20, col = "white", border = "white")
 text(x = .21, y = 2.6, labels = "0.01", col = "#772953", cex = .55)
 text(x = .21, y = 4.0, labels = "0.10", col = "#772953", cex = .55)
