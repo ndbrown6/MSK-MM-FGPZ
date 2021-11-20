@@ -95,3 +95,36 @@ plot_ = data_ %>%
 pdf(file = "vb_all.pdf", width = 6, height = 5)
 print(plot_)
 dev.off()
+
+# box plot of ccf
+data("vb=n")
+data = data %>%
+       dplyr::mutate(Case_ID = paste0("MOS", Case_ID))
+alpha = readr::read_tsv(file = "alpha.txt", col_names = TRUE, col_types = cols(.default = col_character())) %>%
+	readr::type_convert() %>%
+	dplyr::rename(Case_ID = `Case ID`,
+		      HGVSp_Short = `Aminoacid change`,
+		      Gene_Symbol = `Candidate mosaic gene`)
+data = data %>%
+       dplyr::left_join(alpha, by = c("Case_ID", "Gene_Symbol", "HGVSp_Short")) %>%
+       dplyr::mutate(X = rep(1, nrow(data)))
+
+plot_ = data %>%
+	ggplot(aes(x = X, y = 100*`Cancer cell fraction`)) +
+	geom_boxplot(stat = "boxplot", outlier.colour = NA) +
+	geom_jitter(data = data, mapping = aes(x = X, y = 100*`Cancer cell fraction`, fill = factor(LOF), size = T_Total),
+		    stat = "identity", height = 0, shape = 21, alpha = .75, inherit.aes = FALSE) +
+	scale_fill_manual(values = c("#e41a1c", "#377eb8")) +
+	xlab("") +
+	ylab("\nCCF (%)\n\n") +
+	scale_x_continuous(limits = c(0.5, 1.5),
+			   breaks = 1,
+			   labels = "") +
+	scale_y_continuous(limits = c(0, 100)) +
+	theme_classic() +
+	guides(fill = guide_legend(title = "Loss of Function", override.aes = list(shape = 21, size = 2)),
+	       size = guide_legend(title = "Coverage"))
+
+pdf(file = "alpha_all.pdf", width = 4, height = 5)
+print(plot_)
+dev.off()
