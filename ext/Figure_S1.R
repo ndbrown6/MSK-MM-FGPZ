@@ -31,8 +31,7 @@ for (i in 1:length(s_q)) {
 	data_[[i]] = dplyr::tibble(alpha = alpha,
 				   s_q = s_q[i],
 				   q_t = q_t[i],
-				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]),
-				   beta = paste0("Beta = ", beta))
+				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]))
 }
 data_ = do.call(rbind, data_)
 
@@ -45,11 +44,12 @@ plot_ = data_ %>%
 	ylab(expression(f[sq])) +
 	scale_x_continuous(limits = c(0,.5)) +
 	scale_y_continuous(limits = c(0,1)) +
-	guides(color = guide_legend(title = expression("Total copies (q"[t]~")"), order = 1),
-	       linetype = guide_legend(title = expression("Mutated copies (s"[q]~")"), order = 2)) +
-	facet_wrap(~beta)
+	scale_color_brewer(type = "qual", palette = 6) +
+	theme_classic() +
+	guides(color = guide_legend(title = expression("q"[t]), order = 1),
+	       linetype = guide_legend(title = expression("s"[q]), order = 2))
 
-pdf(file = "beta=.5.pdf", width = 5, height = 3)
+pdf(file = "beta=0.500.pdf", width = 4, height = 3.5)
 print(plot_)
 dev.off()
 
@@ -59,8 +59,7 @@ for (i in 1:length(s_q)) {
 	data_[[i]] = dplyr::tibble(alpha = alpha,
 				   s_q = s_q[i],
 				   q_t = q_t[i],
-				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]),
-				   beta = paste0("Beta = ", beta))
+				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]))
 }
 data_ = do.call(rbind, data_)
 
@@ -73,12 +72,13 @@ plot_ = data_ %>%
 	ylab(expression(f[sq])) +
 	scale_x_continuous(limits = c(0,.5)) +
 	scale_y_continuous(limits = c(0,1)) +
-	guides(color = guide_legend(title = expression("Total copies (q"[t]~")"), order = 1),
-	       linetype = guide_legend(title = expression("Mutated copies (s"[q]~")"), order = 2)) +
-	facet_wrap(~beta)
+	scale_color_brewer(type = "qual", palette = 6) +
+	theme_classic() +
+	guides(color = guide_legend(title = expression("q"[t]), order = 1),
+	       linetype = guide_legend(title = expression("s"[q]), order = 2))
 
 
-pdf(file = "beta=.25.pdf", width = 5, height = 3)
+pdf(file = "beta=0.250.pdf", width = 4, height = 3.5)
 print(plot_)
 dev.off()
 
@@ -88,8 +88,7 @@ for (i in 1:length(s_q)) {
 	data_[[i]] = dplyr::tibble(alpha = alpha,
 				   s_q = s_q[i],
 				   q_t = q_t[i],
-				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]),
-				   beta = paste0("Beta = ", beta))
+				   f_sq = fsq(alpha = alpha, beta = beta, s_q = s_q[i], q_t = q_t[i]))
 }
 data_ = do.call(rbind, data_)
 
@@ -102,11 +101,12 @@ plot_ = data_ %>%
 	ylab(expression(f[sq])) +
 	scale_x_continuous(limits = c(0,.5)) +
 	scale_y_continuous(limits = c(0,1)) +
-	guides(color = guide_legend(title = expression("Total copies (q"[t]~")"), order = 1),
-	       linetype = guide_legend(title = expression("Mutated copies (s"[q]~")"), order = 2)) +
-	facet_wrap(~beta)
+	scale_color_brewer(type = "qual", palette = 6) +
+	theme_classic() +
+	guides(color = guide_legend(title = expression("q"[t]), order = 1),
+	       linetype = guide_legend(title = expression("s"[q]), order = 2))
 
-pdf(file = "beta=.125.pdf", width = 5, height = 3)
+pdf(file = "beta=0.125.pdf", width = 4, height = 3.5)
 print(plot_)
 dev.off()
 
@@ -126,21 +126,22 @@ data_ = do.call(rbind, data_)
 
 plot_ = data_ %>%
 	ggplot(aes(x = alpha, y = f_sq, group = factor(beta))) +
-	geom_line(stat = "identity", size = 1, color = "#772953") +
+	geom_line(stat = "identity", size = .6, color = "#404040") +
 	geom_vline(xintercept = .2, linetype = 3) +
 	geom_hline(yintercept = fsq(alpha = .2, beta = .01, s_q = s_q, q_t = q_t), linetype = 3) +
 	xlab(expression(alpha)) +
 	ylab(expression(f[sq])) +
 	scale_x_continuous(limits = c(0,.5)) +
 	scale_y_continuous(limits = c(0,.5)) +
-	annotate(geom = "rect", xmin = .355, xmax = .395, ymin = .15, ymax = .4, fill = "gray92", alpha = .99) +
-	geom_text(x = .3775, y = .16, label = "0.01", size = 2) +
-	geom_text(x = .3775, y = .2, label = "0.10", size = 2) +
-	geom_text(x = .3775, y = .25, label = "0.20", size = 2) +
-	geom_text(x = .3775, y = .29, label = "0.30", size = 2) +
-	geom_text(x = .3775, y = .335, label = "0.40", size = 2) +
-	geom_text(x = .3775, y = .375, label = "0.50", size = 2)
+	annotate(geom = "rect", xmin = .355, xmax = .395, ymin = .15, ymax = .4, fill = "white", alpha = 1) +
+	geom_text(x = .3775, y = .16, label = "0.01", color = "#404040", size = 2.5) +
+	geom_text(x = .3775, y = .2, label = "0.10", color = "#404040", size = 2.5) +
+	geom_text(x = .3775, y = .25, label = "0.20", color = "#404040", size = 2.5) +
+	geom_text(x = .3775, y = .29, label = "0.30", color = "#404040", size = 2.5) +
+	geom_text(x = .3775, y = .335, label = "0.40", color = "#404040", size = 2.5) +
+	geom_text(x = .3775, y = .375, label = "0.50", color = "#404040", size = 2.5) +
+	theme_classic()
 
-pdf(file = "sq=1_qt=3.pdf", width = 3.25, height = 3)
+pdf(file = "qt=3_sq=1.pdf", width = 4, height = 3.5)
 print(plot_)
 dev.off()
