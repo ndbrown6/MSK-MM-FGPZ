@@ -15,11 +15,6 @@ library('ggsignif')
 library('diverse')
 library("pwr")
 
-'scientific_10' <- function(x) {
-	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
-}
-
-
 # vaf versus coverage
 n_len = 1000
 p1 = seq(from = 0.01125, to = 0.25, length = n_len)
