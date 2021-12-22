@@ -26,10 +26,6 @@ hex_cols = c("#C1272D",
 	     "#F9ED7D",
 	     "#F49C45")
 
-'scientific_10' <- function(x) {
-	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
-}
-
 data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]

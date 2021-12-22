@@ -22,10 +22,6 @@ hex_cols = c("#C1272D",
 	     "#F9ED7D",
 	     "#F49C45")
 
-'scientific_10' <- function(x) {
-	parse(text=gsub("+", "", gsub("e", " %.% 10^", scales::scientific_format()(x)), , fixed = TRUE))
-}
-
 # predict cell generation from actual vb=n data
 data("vb=n")
 m = data %>% .[["N_Alt"]]
