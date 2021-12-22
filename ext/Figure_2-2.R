@@ -11,6 +11,8 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
+library('diverse')
 
 registerDoMC(8)
 
@@ -28,6 +30,8 @@ data("vb=n")
 m = data %>% .[["N_Alt"]]
 c = data %>% .[["N_Total"]]
 
+LL0 = MixtureBB(m = m, c = c, nb = 5)
+
 # test asymmetric model with actual data vb = n and asymmetry a = 0.5->2
 n = 250
 ai = seq(from = 0.5, to = 2, length = n)
@@ -38,8 +42,8 @@ LL = foreach(i=1:n) %dopar% {
 	LL = vector(mode="numeric", length = n)
 	for (j in 1:n) {
 		# asymmetry of all branches
-		a = rep(c(0.27794152, 0.20718832, 0.16374236, 0.08219329, 0.02461742, 0)/2^(-2:-7), each = 2)
-		a[seq(from = 2, to = 12, by = 2)] = 1
+		a = rep(c(LL0$vb/.MMEnv$vb[1:5]), each = 2)
+		a[seq(from = 2, to = 10, by = 2)] = 1
 		
 		# first cell division
 		a[1] = ai[i]
@@ -47,7 +51,7 @@ LL = foreach(i=1:n) %dopar% {
 		# second cell division
 		a[3] = aj[j]
 		
-		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 6)
+		LL[j] = AsymmLL(m = m, c = c, a = a, nb = 5)
 	}
 	return(invisible(LL))
 }
@@ -69,3 +73,6 @@ axis(side = 4, at = seq(from = 0.75, to = 1.75, length = 3)*.MMEnv$vb[2]*100, la
 contour(ai*.MMEnv$vb[1]*100, aj*.MMEnv$vb[2]*100, LL, add = TRUE, nlevels = 5, col = "grey10")
 box()
 dev.off()
+
+LL.1 = SymmLL(m = m, c = c, nb = 5)
+P = 1 - pchisq(2*(max(LL)-LL.1$LL), 2)

@@ -11,6 +11,8 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
+library('diverse')
 
 'prune_segments' <- function(x, n = 10)
 {
@@ -34,6 +36,12 @@ library('copynumber')
 	return(invisible(x))
 }
 
+'absolute_copynumber' <- function(x, alpha, psi, c = 1)
+{
+	y = (1/alpha) * ((2^(x/c))*((psi*alpha) + 2*(1-alpha)) - 2*(1-alpha))
+	return(invisible(y))
+}
+
 data("r(x)")
 data("hg19")
 
@@ -42,7 +50,7 @@ data_ = data %>%
 	dplyr::select(Chromosome, Position, `01-T`) %>%
 	dplyr::rename(Log2Ratio = `01-T`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 150, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
 segmented = prune_segments(x = segmented, n = 10)
 smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
@@ -77,9 +85,9 @@ data_ = data %>%
 	dplyr::select(Chromosome, Position, `08-T1`) %>%
 	dplyr::rename(Log2Ratio = `08-T1`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
-segmented = prune_segments(x = segmented, n = 10)
+segmented = prune_segments(x = segmented, n = 17)
 smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)
 colnames(smoothed) = c("Chromosome", "Position", "Log2Ratio")
 end = NULL
@@ -112,7 +120,7 @@ data_ = data %>%
 	dplyr::select(Chromosome, Position, `08-T2`) %>%
 	dplyr::rename(Log2Ratio = `08-T2`) %>%
 	base::as.data.frame()
-segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 150, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
+segmented = pcf(data = winsorize(data = data_, method = "mad", tau = 2.5, k = 25, verbose = FALSE), kmin = 50, gamma = 50, fast = FALSE, verbose = FALSE)[,2:7,drop = FALSE]
 colnames(segmented) = c("Chromosome", "Arm", "Start", "End", "N", "Log2Ratio")
 segmented = prune_segments(x = segmented, n = 10)
 smoothed = winsorize(data = data_[,c("Chromosome","Position","Log2Ratio")], tau = 2.5, k = 15, verbose = FALSE)

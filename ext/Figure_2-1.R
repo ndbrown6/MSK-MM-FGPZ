@@ -11,6 +11,8 @@ library('foreach')
 library('doMC')
 library('Hmisc')
 library('copynumber')
+library('ggsignif')
+library('diverse')
 
 .MMEnv$min_dist = -Inf
 
